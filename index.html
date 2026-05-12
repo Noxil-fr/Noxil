@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noxil</title>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --accent:  #58a6ff;
+    }
+
+    :root.light {
+      --bg:      #f6f8fa;
+      --surface: #ffffff;
+      --border:  #d0d7de;
+      --text:    #1f2328;
+      --muted:   #656d76;
+      --accent:  #0969da;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .theme-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .theme-btn:hover { color: var(--text); }
+
+    /* ── MAIN ── */
+    main { padding: 56px 0; display: flex; flex-direction: column; gap: 56px; }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* ── TILE ── */
+    .tile {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      min-height: 150px;
+    }
+
+    .tile:hover {
+      border-color: var(--tile-color, var(--accent));
+      box-shadow: 0 0 0 1px var(--tile-color, var(--accent));
+    }
+
+    .tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tile-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--tile-color, var(--muted));
+    }
+
+    .tile-arrow {
+      font-size: 18px;
+      color: var(--muted);
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .tile:hover .tile-arrow {
+      color: var(--tile-color, var(--accent));
+      transform: translate(2px, -2px);
+    }
+
+    .tile-name {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .tile-url {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: auto;
+    }
+
+    /* ── SECTION CONTACT ── */
+    .contact-section {
+    }
+
+    /* Trigger cadenas */
+    .contact-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .contact-trigger:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+
+    /* Code inputs inline */
+    .contact-form {
+      margin-top: 28px;
+    }
+
+    .code-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .digit {
+      width: 36px;
+      height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 600;
+      font-family: inherit;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .digit:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    .code-error {
+      font-size: 13px;
+      color: #f85149;
+      min-height: 20px;
+    }
+
+    /* Contact cards inline */
+    .contact-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+    }
+
+    .contact-name {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .contact-phone {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: inherit;
+      padding: 7px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--muted);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <span class="logo">Noxil.</span>
+      <button class="theme-btn" id="theme-toggle">Clair</button>
+    </header>
+
+    <main>
+      <section class="contact-section">
+        <p class="section-label">Contact</p>
+
+        <button class="contact-trigger" id="contact-trigger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Accès protégé
+        </button>
+
+        <div class="contact-form hidden" id="step-code">
+          <div class="code-inputs">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+          </div>
+          <p class="code-error" id="code-error"></p>
+        </div>
+
+        <div class="contact-list hidden" id="contact-list"></div>
+      </section>
+
+      <section>
+        <p class="section-label">Projets</p>
+        <div class="grid" id="grid"></div>
+      </section>
+    </main>
+
+    <footer>
+      <span id="year"></span> — Noxil
+    </footer>
+  </div>
+
+  <script>
+    /* ── PROJETS ── */
+    const projects = [
+      { name: "Nami.",  url: "https://nami-vert-six.vercel.app/",  color: "#7eb8d4" },
+      { name: "Sanji.", url: "https://noxil-sanji.vercel.app/",    color: "#d4906a" },
+    ];
+
+    const grid = document.getElementById('grid');
+    projects.forEach(p => {
+      const a = document.createElement('a');
+      a.className = 'tile';
+      a.href = p.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.setProperty('--tile-color', p.color);
+      a.innerHTML = `
+        <div class="tile-top">
+          <span class="tile-dot"></span>
+          <span class="tile-arrow">↗</span>
+        </div>
+        <div class="tile-name">${p.name}</div>
+        <div class="tile-url">${p.url.replace('https://', '')}</div>
+      `;
+      grid.appendChild(a);
+    });
+
+    /* ── THEME ── */
+    const themeBtn = document.getElementById('theme-toggle');
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('light', t === 'light');
+      themeBtn.textContent = t === 'light' ? 'Sombre' : 'Clair';
+    }
+    themeBtn.addEventListener('click', () => {
+      const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
+      localStorage.setItem('noxil-theme', next);
+      applyTheme(next);
+    });
+    applyTheme(localStorage.getItem('noxil-theme') || 'dark');
+
+    /* ── ANNEE ── */
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ── CONTACT ── */
+    const trigger   = document.getElementById('contact-trigger');
+    const stepCode  = document.getElementById('step-code');
+    const digits    = document.querySelectorAll('.digit');
+    const codeError = document.getElementById('code-error');
+
+    trigger.addEventListener('click', () => {
+      trigger.classList.add('hidden');
+      stepCode.classList.remove('hidden');
+      digits[0].focus();
+    });
+
+    digits.forEach((d, i) => {
+      d.addEventListener('input', () => {
+        d.value = d.value.replace(/\D/g, '').slice(-1);
+        if (d.value && i < digits.length - 1) digits[i + 1].focus();
+        if ([...digits].every(x => x.value)) verifyCode();
+      });
+      d.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+      });
+    });
+
+    /* ── SHA-256 + XOR ── */
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function xorDecode(hex, key) {
+      return hex.match(/.{2}/g)
+        .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)))
+        .join('');
+    }
+
+    async function verifyCode() {
+      const entered = [...digits].map(d => d.value).join('');
+      const hash    = await sha256(entered);
+
+      if (hash !== NOXIL.h) {
+        codeError.textContent = 'Code incorrect.';
+        digits.forEach(d => d.value = '');
+        digits[0].focus();
+        return;
+      }
+
+      const contacts = xorDecode(NOXIL.d, entered)
+        .split('|')
+        .map(s => { const [name, phone] = s.split(': '); return { name, phone }; });
+
+      stepCode.classList.add('hidden');
+
+      const list = document.getElementById('contact-list');
+      list.innerHTML = '';
+      contacts.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'contact-card';
+        card.innerHTML = `
+          <div>
+            <div class="contact-name">${c.name}</div>
+            <div class="contact-phone">${c.phone}</div>
+          </div>
+          <button class="copy-btn" data-v="${c.phone}">Copier</button>
+        `;
+        card.querySelector('.copy-btn').addEventListener('click', function () {
+          navigator.clipboard.writeText(this.dataset.v);
+          this.textContent = 'Copié ✓';
+          setTimeout(() => this.textContent = 'Copier', 2000);
+        });
+        list.appendChild(card);
+      });
+      list.classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>
