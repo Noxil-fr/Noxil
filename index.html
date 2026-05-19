@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Noxil</title>
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -72,10 +73,24 @@
 
     .theme-btn:hover { color: var(--text); }
 
+    /* ── LOCK SCREEN ── */
+    .lock-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 100px);
+      gap: 0;
+    }
+
+    .lock-label {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
     /* ── MAIN ── */
     main { padding: 32px 0; display: flex; flex-direction: column; gap: 36px; }
-
-    .contact-section { padding: 0; }
 
     .with-divider {
       position: relative;
@@ -85,13 +100,10 @@
     .with-divider::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 1px;
       background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
     }
-
 
     /* ── GRID ── */
     .grid {
@@ -121,75 +133,55 @@
       box-shadow: 0 0 0 1px var(--tile-color, var(--accent));
     }
 
-    .tile-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
     .tile-dot {
       width: 12px;
       height: 12px;
       border-radius: 50%;
       background: var(--tile-color, var(--muted));
+      flex-shrink: 0;
     }
 
-    .tile-arrow {
-      font-size: 18px;
-      color: var(--muted);
-      transition: color 0.15s, transform 0.15s;
-    }
+    .tile-name { font-size: 20px; font-weight: 600; }
+    .tile-url  { font-size: 13px; color: var(--muted); }
 
-    .tile:hover .tile-arrow {
-      color: var(--tile-color, var(--accent));
-      transform: translate(2px, -2px);
-    }
-
-    .tile-name {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .tile-url {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: auto;
-    }
-
-    /* ── SECTION CONTACT ── */
-    .contact-section {
+    /* ── CONTACTS ── */
+    .contact-list {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    /* Trigger cadenas */
-    .contact-trigger {
-      display: inline-flex;
+    .contact-card {
+      display: flex;
       align-items: center;
-      gap: 10px;
-      background: none;
+      gap: 14px;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      color: var(--muted);
-      font-family: inherit;
-      font-size: 14px;
       padding: 10px 16px;
+    }
+
+    .contact-name  { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .contact-phone { font-size: 14px; font-weight: 500; letter-spacing: 0.02em; }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: inherit;
+      padding: 7px 14px;
       cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: color 0.15s, border-color 0.15s;
     }
 
-    .contact-trigger:hover {
-      color: var(--text);
-      border-color: var(--muted);
-    }
+    .copy-btn:hover { color: var(--text); border-color: var(--muted); }
 
-    /* Code inputs inline */
-    .contact-form {
-      margin-top: 28px;
-    }
-
+    /* ── CODE INPUTS ── */
     .code-inputs {
       display: flex;
       gap: 10px;
@@ -220,56 +212,7 @@
       font-size: 13px;
       color: #f85149;
       min-height: 20px;
-    }
-
-    /* Contact cards inline */
-    .contact-list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .contact-card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 16px;
-    }
-
-    .contact-name {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 2px;
-    }
-
-    .contact-phone {
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-    }
-
-    .copy-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      font-size: 13px;
-      font-family: inherit;
-      padding: 7px 14px;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: color 0.15s, border-color 0.15s;
-    }
-
-    .copy-btn:hover {
-      color: var(--text);
-      border-color: var(--muted);
+      text-align: center;
     }
 
     /* ── FOOTER ── */
@@ -315,6 +258,7 @@
     .note-header  { grid-column: 1; grid-row: 1; }
     .notes-list   { display: flex; flex-direction: column; grid-column: 1; grid-row: 2; }
     .note-preview { grid-column: 2; grid-row: 2; }
+
     .notes-list.has-notes {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -323,7 +267,6 @@
     }
 
     .note-preview {
-      flex: 1;
       opacity: 0;
       transition: opacity 0.18s;
       pointer-events: none;
@@ -332,21 +275,9 @@
 
     .note-preview.visible { opacity: 1; }
 
-    .note-preview-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .note-preview-body {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.65;
-      white-space: pre-wrap;
-    }
-
-    .note-empty { font-size: 14px; color: var(--muted); }
+    .note-preview-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .note-preview-body  { font-size: 13px; color: var(--muted); line-height: 1.65; white-space: pre-wrap; }
+    .note-empty         { font-size: 14px; color: var(--muted); }
 
     .note-item {
       display: flex;
@@ -360,9 +291,7 @@
     }
 
     .note-item:last-child { border-bottom: none; }
-
     .note-item:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
-
     .note-item-title { font-size: 14px; font-weight: 500; flex: 1; }
 
     .note-delete-btn {
@@ -487,11 +416,7 @@
       gap: 18px;
     }
 
-    .confirm-message {
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.5;
-    }
+    .confirm-message { font-size: 14px; color: var(--text); line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -502,32 +427,28 @@
       <button class="theme-btn" id="theme-toggle">Clair</button>
     </header>
 
-    <main>
-      <section class="contact-section">
-        <button class="contact-trigger" id="contact-trigger">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          Accès protégé
-        </button>
+    <!-- Écran de verrouillage -->
+    <div class="lock-screen" id="lock-screen">
+      <p class="lock-label">Code d'accès</p>
+      <div class="code-inputs">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
+      </div>
+      <p class="code-error" id="code-error"></p>
+    </div>
 
-        <div class="contact-form hidden" id="step-code">
-          <div class="code-inputs">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-            <input class="digit" type="password" inputmode="numeric" maxlength="1" autocomplete="off">
-          </div>
-          <p class="code-error" id="code-error"></p>
-        </div>
-
-        <div class="contact-list hidden" id="contact-list"></div>
-      </section>
+    <!-- Contenu principal (masqué jusqu'au déverrouillage) -->
+    <main class="hidden" id="main">
 
       <section>
+        <div class="contact-list" id="contact-list"></div>
+      </section>
+
+      <section class="with-divider">
         <div class="grid" id="grid"></div>
       </section>
 
@@ -550,16 +471,15 @@
           </div>
         </div>
       </section>
+
     </main>
 
-    <footer>
-      <span id="year"></span> — Noxil
-    </footer>
+    <footer><span id="year"></span> — Noxil</footer>
   </div>
 
   <div class="modal-overlay hidden" id="confirm-modal">
     <div class="modal confirm-modal">
-      <p class="confirm-message" id="confirm-message">Supprimer cette note ?</p>
+      <p class="confirm-message">Supprimer cette note ?</p>
       <div class="modal-actions">
         <button class="btn-cancel" id="confirm-cancel">Annuler</button>
         <button class="btn-danger" id="confirm-ok">Supprimer</button>
@@ -579,30 +499,6 @@
   </div>
 
   <script>
-    /* ── PROJETS ── */
-    const projects = [
-      { name: "Nami.",  url: "https://nami-vert-six.vercel.app/",  color: "#7eb8d4" },
-      { name: "Sanji.", url: "https://noxil-sanji.vercel.app/",    color: "#d4906a" },
-    ];
-
-    const grid = document.getElementById('grid');
-    projects.forEach(p => {
-      const a = document.createElement('a');
-      a.className = 'tile';
-      a.href = p.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.style.setProperty('--tile-color', p.color);
-      a.innerHTML = `
-        <div>
-          <div class="tile-name">${p.name}</div>
-          <div class="tile-url">${p.url.replace('https://', '')}</div>
-        </div>
-        <span class="tile-dot"></span>
-      `;
-      grid.appendChild(a);
-    });
-
     /* ── THEME ── */
     const themeBtn = document.getElementById('theme-toggle');
     function applyTheme(t) {
@@ -616,20 +512,17 @@
     });
     applyTheme(localStorage.getItem('noxil-theme') || 'dark');
 
-    /* ── ANNEE ── */
-    document.getElementById('year').textContent = new Date().getFullYear();
+    /* ── SHA-256 ── */
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-    /* ── CONTACT ── */
-    const trigger   = document.getElementById('contact-trigger');
-    const stepCode  = document.getElementById('step-code');
-    const digits    = document.querySelectorAll('.digit');
-    const codeError = document.getElementById('code-error');
-
-    trigger.addEventListener('click', () => {
-      trigger.classList.add('hidden');
-      stepCode.classList.remove('hidden');
-      digits[0].focus();
-    });
+    /* ── CODE GATE ── */
+    const lockScreen = document.getElementById('lock-screen');
+    const mainEl     = document.getElementById('main');
+    const digits     = document.querySelectorAll('.digit');
+    const codeError  = document.getElementById('code-error');
 
     digits.forEach((d, i) => {
       d.addEventListener('input', () => {
@@ -642,134 +535,9 @@
       });
     });
 
-    /* ── SHA-256 + XOR ── */
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+    digits[0].focus();
 
-    function xorDecode(hex, key) {
-      return hex.match(/.{2}/g)
-        .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)))
-        .join('');
-    }
-
-    /* ── NOTES ── */
-    const NOTES_KEY = 'noxil-notes';
-
-    function loadNotes() {
-      try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
-      catch { return []; }
-    }
-
-    function saveNotes(notes) {
-      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    function formatDate(iso) {
-      return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
-    }
-
-    let currentEditId = null;
-
-    function renderNotes() {
-      const notes = loadNotes();
-      const list  = document.getElementById('notes-list');
-      const empty = document.getElementById('notes-empty');
-      list.querySelectorAll('.note-item').forEach(c => c.remove());
-      if (notes.length === 0) { empty.classList.remove('hidden'); list.classList.remove('has-notes'); return; }
-      empty.classList.add('hidden');
-      list.classList.add('has-notes');
-      notes.slice().reverse().forEach(note => {
-        const item = document.createElement('div');
-        item.className = 'note-item';
-        item.innerHTML = `
-          <span class="note-item-title">${escapeHtml(note.title || 'Sans titre')}</span>
-          <button class="note-delete-btn" data-id="${note.id}" title="Supprimer">✕</button>
-        `;
-        item.addEventListener('mouseenter', () => {
-          document.getElementById('preview-title').textContent = note.title || 'Sans titre';
-          document.getElementById('preview-body').textContent = note.content || '';
-          document.getElementById('note-preview').classList.add('visible');
-        });
-        item.addEventListener('mouseleave', () => {
-          document.getElementById('note-preview').classList.remove('visible');
-        });
-        item.addEventListener('click', () => openNoteModal(note));
-        item.querySelector('.note-delete-btn').addEventListener('click', function (e) {
-          e.stopPropagation();
-          const id = Number(this.dataset.id);
-          showConfirm(() => { saveNotes(loadNotes().filter(n => n.id !== id)); renderNotes(); });
-        });
-        list.appendChild(item);
-      });
-    }
-
-    /* ── CONFIRM ── */
-    const confirmModal = document.getElementById('confirm-modal');
-
-    function showConfirm(onConfirm) {
-      confirmModal.classList.remove('hidden');
-      const ok     = document.getElementById('confirm-ok');
-      const cancel = document.getElementById('confirm-cancel');
-      function cleanup() { confirmModal.classList.add('hidden'); ok.removeEventListener('click', handleOk); cancel.removeEventListener('click', handleCancel); }
-      function handleOk()     { cleanup(); onConfirm(); }
-      function handleCancel() { cleanup(); }
-      ok.addEventListener('click', handleOk);
-      cancel.addEventListener('click', handleCancel);
-    }
-
-    const noteModal      = document.getElementById('note-modal');
-    const newNoteBtn     = document.getElementById('new-note-btn');
-    const modalCancel    = document.getElementById('modal-cancel');
-    const modalSave      = document.getElementById('modal-save');
-    const noteTitleInput = document.getElementById('note-title');
-    const noteBodyInput  = document.getElementById('note-content');
-
-    function openModal() {
-      currentEditId = null;
-      noteTitleInput.value = '';
-      noteBodyInput.value = '';
-      noteModal.classList.remove('hidden');
-      noteTitleInput.focus();
-    }
-
-    function openNoteModal(note) {
-      currentEditId = note.id;
-      noteTitleInput.value = note.title;
-      noteBodyInput.value = note.content;
-      noteModal.classList.remove('hidden');
-      noteTitleInput.focus();
-    }
-
-    function closeModal() { noteModal.classList.add('hidden'); }
-
-    newNoteBtn.addEventListener('click', openModal);
-    modalCancel.addEventListener('click', closeModal);
-    noteModal.addEventListener('click', e => { if (e.target === noteModal) closeModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-    modalSave.addEventListener('click', () => {
-      const title   = noteTitleInput.value.trim();
-      const content = noteBodyInput.value.trim();
-      if (!title && !content) return;
-      const notes = loadNotes();
-      if (currentEditId !== null) {
-        const idx = notes.findIndex(n => n.id === currentEditId);
-        if (idx !== -1) { notes[idx].title = title; notes[idx].content = content; }
-      } else {
-        notes.push({ id: Date.now(), title, content, createdAt: new Date().toISOString() });
-      }
-      saveNotes(notes);
-      renderNotes();
-      closeModal();
-    });
-
-    renderNotes();
+    let sb = null;
 
     async function verifyCode() {
       const entered = [...digits].map(d => d.value).join('');
@@ -782,12 +550,77 @@
         return;
       }
 
-      const contacts = xorDecode(NOXIL.d, entered)
-        .split('|')
-        .map(s => { const [name, phone] = s.split(': '); return { name, phone }; });
+      codeError.textContent = 'Connexion…';
+      sb = window.supabase.createClient(NOXIL.url, NOXIL.key);
 
-      stepCode.classList.add('hidden');
+      try {
+        const [{ data: projects, error: e1 }, { data: contacts, error: e2 }, { data: notes, error: e3 }] = await Promise.all([
+          sb.from('projects').select('*').order('ord'),
+          sb.from('contacts').select('*').order('ord'),
+          sb.from('notes').select('*').order('created_at', { ascending: false })
+        ]);
 
+        if (e1 || e2 || e3) throw new Error();
+
+        renderGrid(projects || []);
+        renderContacts(contacts || []);
+        await migrateLocalNotes(notes || []);
+
+        lockScreen.classList.add('hidden');
+        mainEl.classList.remove('hidden');
+      } catch {
+        codeError.textContent = 'Erreur de connexion.';
+        digits.forEach(d => d.value = '');
+        digits[0].focus();
+      }
+    }
+
+    /* ── MIGRATION LOCALSTORAGE → SUPABASE ── */
+    async function migrateLocalNotes(remoteNotes) {
+      const local = JSON.parse(localStorage.getItem('noxil-notes') || '[]');
+      if (local.length > 0) {
+        await Promise.all(local.map(n =>
+          sb.from('notes').insert({
+            title:      n.title   || '',
+            content:    n.content || '',
+            created_at: n.createdAt || new Date().toISOString()
+          })
+        ));
+        localStorage.removeItem('noxil-notes');
+        const { data: fresh } = await sb.from('notes').select('*').order('created_at', { ascending: false });
+        renderNotes(fresh || []);
+      } else {
+        renderNotes(remoteNotes);
+      }
+    }
+
+    /* ── RENDER ── */
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderGrid(projects) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      projects.forEach(p => {
+        const a = document.createElement('a');
+        a.className = 'tile';
+        a.href = p.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.setProperty('--tile-color', p.color);
+        a.innerHTML = `
+          <div>
+            <div class="tile-name">${escapeHtml(p.name)}</div>
+            <div class="tile-url">${escapeHtml(p.url.replace('https://', ''))}</div>
+          </div>
+          <span class="tile-dot"></span>
+        `;
+        grid.appendChild(a);
+      });
+    }
+
+    function renderContacts(contacts) {
       const list = document.getElementById('contact-list');
       list.innerHTML = '';
       contacts.forEach(c => {
@@ -795,10 +628,10 @@
         card.className = 'contact-card';
         card.innerHTML = `
           <div>
-            <div class="contact-name">${c.name}</div>
-            <div class="contact-phone">${c.phone}</div>
+            <div class="contact-name">${escapeHtml(c.name)}</div>
+            <div class="contact-phone">${escapeHtml(c.phone)}</div>
           </div>
-          <button class="copy-btn" data-v="${c.phone}">Copier</button>
+          <button class="copy-btn" data-v="${escapeHtml(c.phone)}">Copier</button>
         `;
         card.querySelector('.copy-btn').addEventListener('click', function () {
           navigator.clipboard.writeText(this.dataset.v);
@@ -807,8 +640,115 @@
         });
         list.appendChild(card);
       });
-      list.classList.remove('hidden');
     }
+
+    function renderNotes(notes) {
+      const list  = document.getElementById('notes-list');
+      const empty = document.getElementById('notes-empty');
+      list.querySelectorAll('.note-item').forEach(el => el.remove());
+      if (notes.length === 0) {
+        empty.classList.remove('hidden');
+        list.classList.remove('has-notes');
+        return;
+      }
+      empty.classList.add('hidden');
+      list.classList.add('has-notes');
+      notes.forEach(note => {
+        const item = document.createElement('div');
+        item.className = 'note-item';
+        item.innerHTML = `
+          <span class="note-item-title">${escapeHtml(note.title || 'Sans titre')}</span>
+          <button class="note-delete-btn" data-id="${note.id}" title="Supprimer">✕</button>
+        `;
+        item.addEventListener('mouseenter', () => {
+          document.getElementById('preview-title').textContent = note.title || 'Sans titre';
+          document.getElementById('preview-body').textContent  = note.content || '';
+          document.getElementById('note-preview').classList.add('visible');
+        });
+        item.addEventListener('mouseleave', () => {
+          document.getElementById('note-preview').classList.remove('visible');
+        });
+        item.addEventListener('click', () => openNoteModal(note));
+        item.querySelector('.note-delete-btn').addEventListener('click', async function (e) {
+          e.stopPropagation();
+          const id = this.dataset.id;
+          showConfirm(async () => {
+            await sb.from('notes').delete().eq('id', id);
+            const { data } = await sb.from('notes').select('*').order('created_at', { ascending: false });
+            renderNotes(data || []);
+          });
+        });
+        list.appendChild(item);
+      });
+    }
+
+    /* ── CONFIRM MODAL ── */
+    const confirmModal = document.getElementById('confirm-modal');
+
+    function showConfirm(onConfirm) {
+      confirmModal.classList.remove('hidden');
+      const ok     = document.getElementById('confirm-ok');
+      const cancel = document.getElementById('confirm-cancel');
+      function cleanup() {
+        confirmModal.classList.add('hidden');
+        ok.removeEventListener('click', handleOk);
+        cancel.removeEventListener('click', handleCancel);
+      }
+      function handleOk()     { cleanup(); onConfirm(); }
+      function handleCancel() { cleanup(); }
+      ok.addEventListener('click', handleOk);
+      cancel.addEventListener('click', handleCancel);
+    }
+
+    /* ── NOTE MODAL ── */
+    const noteModal      = document.getElementById('note-modal');
+    const newNoteBtn     = document.getElementById('new-note-btn');
+    const modalCancel    = document.getElementById('modal-cancel');
+    const modalSave      = document.getElementById('modal-save');
+    const noteTitleInput = document.getElementById('note-title');
+    const noteBodyInput  = document.getElementById('note-content');
+    let currentEditId    = null;
+
+    function openModal() {
+      currentEditId = null;
+      noteTitleInput.value = '';
+      noteBodyInput.value  = '';
+      noteModal.classList.remove('hidden');
+      noteTitleInput.focus();
+    }
+
+    function openNoteModal(note) {
+      currentEditId        = note.id;
+      noteTitleInput.value = note.title;
+      noteBodyInput.value  = note.content;
+      noteModal.classList.remove('hidden');
+      noteTitleInput.focus();
+    }
+
+    function closeModal() { noteModal.classList.add('hidden'); }
+
+    newNoteBtn.addEventListener('click', openModal);
+    modalCancel.addEventListener('click', closeModal);
+    noteModal.addEventListener('click', e => { if (e.target === noteModal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    modalSave.addEventListener('click', async () => {
+      const title   = noteTitleInput.value.trim();
+      const content = noteBodyInput.value.trim();
+      if (!title && !content) return;
+
+      if (currentEditId !== null) {
+        await sb.from('notes').update({ title, content }).eq('id', currentEditId);
+      } else {
+        await sb.from('notes').insert({ title, content });
+      }
+
+      const { data } = await sb.from('notes').select('*').order('created_at', { ascending: false });
+      renderNotes(data || []);
+      closeModal();
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
 </body>
