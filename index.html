@@ -18,12 +18,12 @@
     }
 
     :root.light {
-      --bg:      #f6f8fa;
-      --surface: #ffffff;
-      --border:  #d0d7de;
-      --text:    #1f2328;
-      --muted:   #656d76;
-      --accent:  #0969da;
+      --bg:      #d8dde5;
+      --surface: #e6e9ef;
+      --border:  #b4bcc8;
+      --text:    #1a1e24;
+      --muted:   #505a68;
+      --accent:  #0860c8;
     }
 
     body {
@@ -73,16 +73,25 @@
     .theme-btn:hover { color: var(--text); }
 
     /* ── MAIN ── */
-    main { padding: 56px 0; display: flex; flex-direction: column; gap: 56px; }
+    main { padding: 32px 0; display: flex; flex-direction: column; gap: 36px; }
 
-    .section-label {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 20px;
+    .contact-section { padding: 0; }
+
+    .with-divider {
+      position: relative;
+      padding-top: 36px;
     }
+
+    .with-divider::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+
 
     /* ── GRID ── */
     .grid {
@@ -94,16 +103,17 @@
     /* ── TILE ── */
     .tile {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 28px;
+      padding: 10px 16px;
       text-decoration: none;
       color: var(--text);
       transition: border-color 0.15s, box-shadow 0.15s;
-      min-height: 150px;
     }
 
     .tile:hover {
@@ -148,6 +158,10 @@
 
     /* ── SECTION CONTACT ── */
     .contact-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
 
     /* Trigger cadenas */
@@ -259,14 +273,225 @@
     }
 
     /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 20px 0;
-      font-size: 12px;
-      color: var(--muted);
+    footer { display: none; }
+
+    .hidden { display: none !important; }
+
+    /* ── NOTES ── */
+    .note-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 0;
     }
 
-    .hidden { display: none; }
+    .new-note-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .new-note-btn:hover { border-color: var(--muted); }
+
+    .notes-wrapper {
+      display: grid;
+      grid-template-columns: 50% 1fr;
+      grid-template-rows: auto auto;
+      column-gap: 24px;
+      row-gap: 14px;
+      align-items: start;
+    }
+
+    .note-header  { grid-column: 1; grid-row: 1; }
+    .notes-list   { display: flex; flex-direction: column; grid-column: 1; grid-row: 2; }
+    .note-preview { grid-column: 2; grid-row: 2; }
+    .notes-list.has-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .note-preview {
+      flex: 1;
+      opacity: 0;
+      transition: opacity 0.18s;
+      pointer-events: none;
+      padding-top: 2px;
+    }
+
+    .note-preview.visible { opacity: 1; }
+
+    .note-preview-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .note-preview-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .note-empty { font-size: 14px; color: var(--muted); }
+
+    .note-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    .note-item:last-child { border-bottom: none; }
+
+    .note-item:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+    .note-item-title { font-size: 14px; font-weight: 500; flex: 1; }
+
+    .note-delete-btn {
+      background: none;
+      border: none;
+      color: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 4px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.12s;
+    }
+
+    .note-item:hover .note-delete-btn { color: var(--muted); }
+    .note-delete-btn:hover { color: #f85149 !important; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal input {
+      padding: 22px 24px 6px;
+      font-size: 20px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+
+    .modal textarea {
+      padding: 6px 24px 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      min-height: 200px;
+      width: 100%;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-cancel {
+      background: none;
+      border: none;
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .btn-cancel:hover { color: var(--text); }
+
+    .btn-save {
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-save:hover { opacity: 0.82; }
+
+    .btn-danger {
+      background: #c0392b;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-danger:hover { opacity: 0.82; }
+
+    .confirm-modal {
+      max-width: 300px;
+      padding: 22px 22px 14px;
+      gap: 18px;
+    }
+
+    .confirm-message {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -279,8 +504,6 @@
 
     <main>
       <section class="contact-section">
-        <p class="section-label">Contact</p>
-
         <button class="contact-trigger" id="contact-trigger">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -305,14 +528,54 @@
       </section>
 
       <section>
-        <p class="section-label">Projets</p>
         <div class="grid" id="grid"></div>
+      </section>
+
+      <section class="with-divider">
+        <div class="notes-wrapper">
+          <div class="note-header">
+            <button class="new-note-btn" id="new-note-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Nouvelle note
+            </button>
+          </div>
+          <div class="notes-list" id="notes-list">
+            <p class="note-empty" id="notes-empty">Aucune note pour l'instant.</p>
+          </div>
+          <div class="note-preview" id="note-preview">
+            <div class="note-preview-title" id="preview-title"></div>
+            <div class="note-preview-body" id="preview-body"></div>
+          </div>
+        </div>
       </section>
     </main>
 
     <footer>
       <span id="year"></span> — Noxil
     </footer>
+  </div>
+
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="modal confirm-modal">
+      <p class="confirm-message" id="confirm-message">Supprimer cette note ?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="confirm-cancel">Annuler</button>
+        <button class="btn-danger" id="confirm-ok">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="note-modal">
+    <div class="modal">
+      <input type="text" id="note-title" placeholder="Titre" maxlength="80">
+      <textarea id="note-content" placeholder="Contenu de la note…"></textarea>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="modal-cancel">Annuler</button>
+        <button class="btn-save" id="modal-save">Enregistrer</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -331,12 +594,11 @@
       a.rel = 'noopener noreferrer';
       a.style.setProperty('--tile-color', p.color);
       a.innerHTML = `
-        <div class="tile-top">
-          <span class="tile-dot"></span>
-          <span class="tile-arrow">↗</span>
+        <div>
+          <div class="tile-name">${p.name}</div>
+          <div class="tile-url">${p.url.replace('https://', '')}</div>
         </div>
-        <div class="tile-name">${p.name}</div>
-        <div class="tile-url">${p.url.replace('https://', '')}</div>
+        <span class="tile-dot"></span>
       `;
       grid.appendChild(a);
     });
@@ -391,6 +653,123 @@
         .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)))
         .join('');
     }
+
+    /* ── NOTES ── */
+    const NOTES_KEY = 'noxil-notes';
+
+    function loadNotes() {
+      try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveNotes(notes) {
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatDate(iso) {
+      return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(iso));
+    }
+
+    let currentEditId = null;
+
+    function renderNotes() {
+      const notes = loadNotes();
+      const list  = document.getElementById('notes-list');
+      const empty = document.getElementById('notes-empty');
+      list.querySelectorAll('.note-item').forEach(c => c.remove());
+      if (notes.length === 0) { empty.classList.remove('hidden'); list.classList.remove('has-notes'); return; }
+      empty.classList.add('hidden');
+      list.classList.add('has-notes');
+      notes.slice().reverse().forEach(note => {
+        const item = document.createElement('div');
+        item.className = 'note-item';
+        item.innerHTML = `
+          <span class="note-item-title">${escapeHtml(note.title || 'Sans titre')}</span>
+          <button class="note-delete-btn" data-id="${note.id}" title="Supprimer">✕</button>
+        `;
+        item.addEventListener('mouseenter', () => {
+          document.getElementById('preview-title').textContent = note.title || 'Sans titre';
+          document.getElementById('preview-body').textContent = note.content || '';
+          document.getElementById('note-preview').classList.add('visible');
+        });
+        item.addEventListener('mouseleave', () => {
+          document.getElementById('note-preview').classList.remove('visible');
+        });
+        item.addEventListener('click', () => openNoteModal(note));
+        item.querySelector('.note-delete-btn').addEventListener('click', function (e) {
+          e.stopPropagation();
+          const id = Number(this.dataset.id);
+          showConfirm(() => { saveNotes(loadNotes().filter(n => n.id !== id)); renderNotes(); });
+        });
+        list.appendChild(item);
+      });
+    }
+
+    /* ── CONFIRM ── */
+    const confirmModal = document.getElementById('confirm-modal');
+
+    function showConfirm(onConfirm) {
+      confirmModal.classList.remove('hidden');
+      const ok     = document.getElementById('confirm-ok');
+      const cancel = document.getElementById('confirm-cancel');
+      function cleanup() { confirmModal.classList.add('hidden'); ok.removeEventListener('click', handleOk); cancel.removeEventListener('click', handleCancel); }
+      function handleOk()     { cleanup(); onConfirm(); }
+      function handleCancel() { cleanup(); }
+      ok.addEventListener('click', handleOk);
+      cancel.addEventListener('click', handleCancel);
+    }
+
+    const noteModal      = document.getElementById('note-modal');
+    const newNoteBtn     = document.getElementById('new-note-btn');
+    const modalCancel    = document.getElementById('modal-cancel');
+    const modalSave      = document.getElementById('modal-save');
+    const noteTitleInput = document.getElementById('note-title');
+    const noteBodyInput  = document.getElementById('note-content');
+
+    function openModal() {
+      currentEditId = null;
+      noteTitleInput.value = '';
+      noteBodyInput.value = '';
+      noteModal.classList.remove('hidden');
+      noteTitleInput.focus();
+    }
+
+    function openNoteModal(note) {
+      currentEditId = note.id;
+      noteTitleInput.value = note.title;
+      noteBodyInput.value = note.content;
+      noteModal.classList.remove('hidden');
+      noteTitleInput.focus();
+    }
+
+    function closeModal() { noteModal.classList.add('hidden'); }
+
+    newNoteBtn.addEventListener('click', openModal);
+    modalCancel.addEventListener('click', closeModal);
+    noteModal.addEventListener('click', e => { if (e.target === noteModal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    modalSave.addEventListener('click', () => {
+      const title   = noteTitleInput.value.trim();
+      const content = noteBodyInput.value.trim();
+      if (!title && !content) return;
+      const notes = loadNotes();
+      if (currentEditId !== null) {
+        const idx = notes.findIndex(n => n.id === currentEditId);
+        if (idx !== -1) { notes[idx].title = title; notes[idx].content = content; }
+      } else {
+        notes.push({ id: Date.now(), title, content, createdAt: new Date().toISOString() });
+      }
+      saveNotes(notes);
+      renderNotes();
+      closeModal();
+    });
+
+    renderNotes();
 
     async function verifyCode() {
       const entered = [...digits].map(d => d.value).join('');
