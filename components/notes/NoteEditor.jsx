@@ -1,0 +1,66 @@
+'use client'
+
+import { useEffect, useRef, useCallback } from 'react'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
+import TextAlign from '@tiptap/extension-text-align'
+import TextStyle from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
+import Placeholder from '@tiptap/extension-placeholder'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import Toolbar from './Toolbar'
+
+export default function NoteEditor({ page, onSave }) {
+  const saveTimer = useRef(null)
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextStyle,
+      Color,
+      Highlight.configure({ multicolor: true }),
+      Placeholder.configure({ placeholder: 'Commence à écrire…' }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+    ],
+    content: page.content && Object.keys(page.content).length ? page.content : '',
+    editorProps: {
+      attributes: { class: 'tiptap-editor outline-none' },
+    },
+    onUpdate: ({ editor }) => {
+      clearTimeout(saveTimer.current)
+      saveTimer.current = setTimeout(() => {
+        onSave(page.id, { content: editor.getJSON() })
+      }, 1000)
+    },
+  })
+
+  useEffect(() => () => clearTimeout(saveTimer.current), [])
+
+  const handleTitleBlur = useCallback((e) => {
+    const title = e.target.value.trim() || 'Sans titre'
+    if (title !== page.title) onSave(page.id, { title })
+  }, [page.id, page.title, onSave])
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <Toolbar editor={editor} />
+      <div className="flex-1 overflow-y-auto px-14 py-10">
+        <input
+          key={page.id}
+          defaultValue={page.title === 'Sans titre' ? '' : page.title}
+          placeholder="Sans titre"
+          onBlur={handleTitleBlur}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); editor?.commands.focus() } }}
+          className="w-full text-3xl font-bold bg-transparent border-none outline-none mb-6 text-nox-text placeholder:text-nox-muted/30"
+        />
+        <EditorContent editor={editor} />
+      </div>
+    </div>
+  )
+}

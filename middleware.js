@@ -9,5 +9,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/hub/:path*'],
+  matcher: ['/hub/:path*', '/notes/:path*'],
 }
