@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import Header from '@/components/Header'
@@ -8,16 +10,18 @@ import ProjectGrid from '@/components/ProjectGrid'
 import Notes from '@/components/Notes'
 
 export default function HubPage() {
+  const [sb, setSb]           = useState(null)
   const [contacts, setContacts] = useState([])
   const [projects, setProjects] = useState([])
-  const [notes, setNotes]     = useState([])
-  const sb = getSupabase()
+  const [notes, setNotes]       = useState([])
 
   useEffect(() => {
+    const client = getSupabase()
+    setSb(client)
     Promise.all([
-      sb.from('projects').select('*').order('ord'),
-      sb.from('contacts').select('*').order('ord'),
-      sb.from('notes').select('*').order('created_at', { ascending: false }),
+      client.from('projects').select('*').order('ord'),
+      client.from('contacts').select('*').order('ord'),
+      client.from('notes').select('*').order('created_at', { ascending: false }),
     ]).then(([{ data: p }, { data: c }, { data: n }]) => {
       setProjects(p || [])
       setContacts(c || [])
@@ -34,7 +38,7 @@ export default function HubPage() {
           <ProjectGrid projects={projects} />
         </div>
         <div className="section-divider">
-          <Notes sb={sb} notes={notes} setNotes={setNotes} />
+          {sb && <Notes sb={sb} notes={notes} setNotes={setNotes} />}
         </div>
       </main>
     </div>
