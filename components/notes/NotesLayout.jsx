@@ -37,9 +37,10 @@ export default function NotesLayout() {
   }, [sb, selectedNotebook?.id])
 
   const createNotebook = async () => {
-    const { data } = await sb.from('notebooks')
+    const { data, error } = await sb.from('notebooks')
       .insert({ name: 'Nouveau carnet', position: notebooks.length })
       .select().single()
+    if (error || !data) { console.error('createNotebook:', error); return }
     setNotebooks(prev => [...prev, data])
     setSelectedNotebook(data)
     setPages([])
@@ -54,9 +55,10 @@ export default function NotesLayout() {
 
   const createPage = async () => {
     if (!selectedNotebook) return
-    const { data } = await sb.from('pages')
+    const { data, error } = await sb.from('pages')
       .insert({ notebook_id: selectedNotebook.id, title: 'Sans titre', content: {}, position: pages.length })
       .select().single()
+    if (error || !data) { console.error('createPage:', error); return }
     setPages(prev => [...prev, data])
     setSelectedPage(data)
   }
