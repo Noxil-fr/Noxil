@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:      #0d1117;
+  --surface: #161b22;
+  --border:  #30363d;
+  --text:    #e6edf3;
+  --muted:   #8b949e;
+  --accent:  #58a6ff;
+}
+
+:root.light {
+  --bg:      #d8dde5;
+  --surface: #e6e9ef;
+  --border:  #b4bcc8;
+  --text:    #1a1e24;
+  --muted:   #505a68;
+  --accent:  #0860c8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background 0.25s, color 0.25s;
+}
+
+/* digit inputs */
+.digit {
+  width: 36px;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.digit:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* divider gradient */
+.section-divider {
+  position: relative;
+  padding-top: 36px;
+}
+
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+
+/* notes list */
+.notes-list.has-notes {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.note-item:last-child { border-bottom: none; }
+
+.note-item:hover .note-delete-btn { color: var(--muted); }
+.note-delete-btn:hover { color: #f85149 !important; }
+
+/* modal textarea */
+.note-textarea {
+  padding: 6px 24px 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  min-height: 200px;
+  width: 100%;
+}
