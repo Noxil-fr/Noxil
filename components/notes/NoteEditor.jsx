@@ -11,14 +11,23 @@ import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
+import Link from '@tiptap/extension-link'
+import Table from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { createLowlight, common } from 'lowlight'
 import Toolbar from './Toolbar'
+
+const lowlight = createLowlight(common)
 
 export default function NoteEditor({ page, onSave }) {
   const saveTimer = useRef(null)
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ codeBlock: false }),
       Underline,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
@@ -27,6 +36,12 @@ export default function NoteEditor({ page, onSave }) {
       Placeholder.configure({ placeholder: 'Commence à écrire…' }),
       TaskList,
       TaskItem.configure({ nested: true }),
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'tiptap-link' } }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      CodeBlockLowlight.configure({ lowlight }),
     ],
     content: page.content && Object.keys(page.content).length ? page.content : '',
     editorProps: {

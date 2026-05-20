@@ -1,6 +1,11 @@
 'use client'
 
-function Btn({ active, onClick, title, children }) {
+import { useState, useRef, useEffect } from 'react'
+
+const TEXT_COLORS = ['#e6edf3','#f85149','#ff9f43','#ffd43b','#6bcb77','#58a6ff','#a78bfa','#f97fa3','#8b949e','#000000']
+const HIGHLIGHT_COLORS = ['#ffd43b40','#6bcb7740','#58a6ff40','#a78bfa40','#f8514940','#ff9f4340']
+
+function Btn({ active, onClick, title, children, className = '' }) {
   return (
     <button
       onMouseDown={e => { e.preventDefault(); onClick() }}
@@ -9,7 +14,7 @@ function Btn({ active, onClick, title, children }) {
         active
           ? 'bg-nox-accent/20 text-nox-accent'
           : 'text-nox-muted hover:text-nox-text hover:bg-white/5'
-      }`}
+      } ${className}`}
     >
       {children}
     </button>
@@ -20,6 +25,107 @@ function Divider() {
   return <div className="w-px h-5 bg-nox-border mx-0.5 shrink-0" />
 }
 
+function ColorPopover({ colors, onSelect, onReset, label, children }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
+        title={label}
+        className="px-2 py-1 rounded text-[13px] text-nox-muted hover:text-nox-text hover:bg-white/5 transition-colors"
+      >
+        {children}
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-nox-surface border border-nox-border rounded-lg p-2 shadow-lg">
+          <div className="grid grid-cols-5 gap-1 mb-1.5">
+            {colors.map(c => (
+              <button
+                key={c}
+                onMouseDown={e => { e.preventDefault(); onSelect(c); setOpen(false) }}
+                className="w-5 h-5 rounded border border-nox-border hover:scale-110 transition-transform"
+                style={{ background: c }}
+                title={c}
+              />
+            ))}
+          </div>
+          <button
+            onMouseDown={e => { e.preventDefault(); onReset(); setOpen(false) }}
+            className="text-[11px] text-nox-muted hover:text-nox-text w-full text-center mt-0.5"
+          >
+            Effacer
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LinkPopover({ editor }) {
+  const [open, setOpen] = useState(false)
+  const [url, setUrl] = useState('')
+  const ref = useRef(null)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  const toggle = () => {
+    if (editor.isActive('link')) {
+      editor.chain().focus().unsetLink().run()
+    } else {
+      setUrl(editor.getAttributes('link').href || '')
+      setOpen(true)
+      setTimeout(() => inputRef.current?.focus(), 50)
+    }
+  }
+
+  const apply = () => {
+    if (!url.trim()) return
+    editor.chain().focus().setLink({ href: url.trim() }).run()
+    setOpen(false)
+    setUrl('')
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onMouseDown={e => { e.preventDefault(); toggle() }}
+        title="Lien"
+        className={`px-2 py-1 rounded text-[13px] font-medium transition-colors ${
+          editor.isActive('link') ? 'bg-nox-accent/20 text-nox-accent' : 'text-nox-muted hover:text-nox-text hover:bg-white/5'
+        }`}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-nox-surface border border-nox-border rounded-lg p-2 shadow-lg flex gap-1.5" style={{ minWidth: 240 }}>
+          <input
+            ref={inputRef}
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') apply(); if (e.key === 'Escape') setOpen(false) }}
+            placeholder="https://..."
+            className="flex-1 bg-transparent border border-nox-border rounded px-2 py-1 text-[13px] text-nox-text outline-none focus:border-nox-accent placeholder:text-nox-muted/50"
+          />
+          <button onMouseDown={e => { e.preventDefault(); apply() }} className="bg-nox-accent text-white rounded px-2.5 py-1 text-[13px] font-medium hover:opacity-80">OK</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Toolbar({ editor }) {
   if (!editor) return null
 
@@ -27,6 +133,7 @@ export default function Toolbar({ editor }) {
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-nox-border bg-nox-surface shrink-0">
+
       {/* Historique */}
       <Btn onClick={() => e.undo().run()} title="Annuler (Ctrl+Z)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
@@ -60,14 +167,37 @@ export default function Toolbar({ editor }) {
 
       <Divider />
 
+      {/* Couleurs */}
+      <ColorPopover
+        colors={TEXT_COLORS}
+        label="Couleur du texte"
+        onSelect={c => editor.chain().focus().setColor(c).run()}
+        onReset={() => editor.chain().focus().unsetColor().run()}
+      >
+        <span className="flex flex-col items-center gap-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          <span className="text-[8px] font-bold" style={{ color: editor.getAttributes('textStyle').color || 'currentColor' }}>A</span>
+        </span>
+      </ColorPopover>
+      <ColorPopover
+        colors={HIGHLIGHT_COLORS}
+        label="Surlignage"
+        onSelect={c => editor.chain().focus().setHighlight({ color: c }).run()}
+        onReset={() => editor.chain().focus().unsetHighlight().run()}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </ColorPopover>
+
+      <Divider />
+
       {/* Alignement */}
-      <Btn active={editor.isActive({ textAlign: 'left' })} onClick={() => e.setTextAlign('left').run()} title="Aligner à gauche">
+      <Btn active={editor.isActive({ textAlign: 'left' })} onClick={() => e.setTextAlign('left').run()} title="Gauche">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
       </Btn>
-      <Btn active={editor.isActive({ textAlign: 'center' })} onClick={() => e.setTextAlign('center').run()} title="Centrer">
+      <Btn active={editor.isActive({ textAlign: 'center' })} onClick={() => e.setTextAlign('center').run()} title="Centre">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
       </Btn>
-      <Btn active={editor.isActive({ textAlign: 'right' })} onClick={() => e.setTextAlign('right').run()} title="Aligner à droite">
+      <Btn active={editor.isActive({ textAlign: 'right' })} onClick={() => e.setTextAlign('right').run()} title="Droite">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
       </Btn>
       <Btn active={editor.isActive({ textAlign: 'justify' })} onClick={() => e.setTextAlign('justify').run()} title="Justifier">
@@ -86,16 +216,42 @@ export default function Toolbar({ editor }) {
       <Btn active={editor.isActive('taskList')} onClick={() => e.toggleTaskList().run()} title="Liste de tâches">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="5" width="6" height="6" rx="1"/><polyline points="5 8 6.5 9.5 9 7"/><line x1="13" y1="8" x2="21" y2="8"/><rect x="3" y="14" width="6" height="6" rx="1"/><line x1="13" y1="17" x2="21" y2="17"/></svg>
       </Btn>
-
-      <Divider />
-
-      {/* Indentation */}
       <Btn onClick={() => e.sinkListItem('listItem').run()} title="Augmenter l'indentation">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="13 8 17 12 13 16"/><line x1="3" y1="12" x2="17" y2="12"/><line x1="21" y1="6" x2="21" y2="18"/></svg>
       </Btn>
       <Btn onClick={() => e.liftListItem('listItem').run()} title="Diminuer l'indentation">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="11 8 7 12 11 16"/><line x1="7" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="3" y2="18"/></svg>
       </Btn>
+
+      <Divider />
+
+      {/* Lien */}
+      <LinkPopover editor={editor} />
+
+      {/* Bloc de code */}
+      <Btn active={editor.isActive('codeBlock')} onClick={() => e.toggleCodeBlock().run()} title="Bloc de code">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </Btn>
+
+      <Divider />
+
+      {/* Tableau */}
+      <Btn onClick={() => e.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="Insérer un tableau">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+      </Btn>
+
+      {/* Contrôles tableau — visibles seulement dans un tableau */}
+      {editor.isActive('table') && (
+        <>
+          <Btn onClick={() => e.addRowAfter().run()} title="Ajouter une ligne">+R</Btn>
+          <Btn onClick={() => e.addColumnAfter().run()} title="Ajouter une colonne">+C</Btn>
+          <Btn onClick={() => e.deleteRow().run()} title="Supprimer la ligne">-R</Btn>
+          <Btn onClick={() => e.deleteColumn().run()} title="Supprimer la colonne">-C</Btn>
+          <Btn onClick={() => e.deleteTable().run()} title="Supprimer le tableau" className="text-danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </Btn>
+        </>
+      )}
     </div>
   )
 }
