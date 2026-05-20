@@ -22,7 +22,7 @@ import Toolbar from './Toolbar'
 
 const lowlight = createLowlight(common)
 
-export default function NoteEditor({ page, onSave }) {
+export default function NoteEditor({ page, onSave, editorDisabled }) {
   const saveTimer = useRef(null)
 
   const editor = useEditor({
@@ -57,6 +57,12 @@ export default function NoteEditor({ page, onSave }) {
   })
 
   useEffect(() => () => clearTimeout(saveTimer.current), [])
+
+  useEffect(() => {
+    if (!editor) return
+    editor.setEditable(!editorDisabled)
+    if (editorDisabled) editor.commands.blur()
+  }, [editor, editorDisabled])
 
   const handleTitleBlur = useCallback((e) => {
     const title = e.target.value.trim() || 'Sans titre'
