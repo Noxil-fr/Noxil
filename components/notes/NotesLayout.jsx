@@ -40,7 +40,7 @@ export default function NotesLayout() {
     const { data, error } = await sb.from('notebooks')
       .insert({ name: 'Nouveau carnet', position: notebooks.length })
       .select().single()
-    if (error || !data) { console.error('createNotebook:', error); return }
+    if (error || !data) { console.error('createNotebook:', error?.message, error?.code, error?.details); return }
     setNotebooks(prev => [...prev, data])
     setSelectedNotebook(data)
     setPages([])
@@ -64,9 +64,14 @@ export default function NotesLayout() {
   }
 
   const savePage = async (pageId, updates) => {
-    await sb.from('pages').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', pageId)
+    const { error } = await sb.from('pages').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', pageId)
+    if (error) { console.error('savePage:', error?.message, error?.code); return }
     setPages(prev => prev.map(p => p.id === pageId ? { ...p, ...updates } : p))
     if (selectedPage?.id === pageId) setSelectedPage(prev => ({ ...prev, ...updates }))
+  }
+
+  const renamePage = async (pageId, title) => {
+    await savePage(pageId, { title })
   }
 
   const deletePage = async (pageId) => {
@@ -88,6 +93,7 @@ export default function NotesLayout() {
         onCreateNotebook={createNotebook}
         onCreatePage={createPage}
         onRenameNotebook={renameNotebook}
+        onRenamePage={renamePage}
         onDeletePage={deletePage}
       />
       <div className="flex-1 overflow-hidden flex flex-col">

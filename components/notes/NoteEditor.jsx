@@ -44,6 +44,7 @@ export default function NoteEditor({ page, onSave }) {
       CodeBlockLowlight.configure({ lowlight }),
     ],
     content: page.content && Object.keys(page.content).length ? page.content : '',
+    immediatelyRender: false,
     editorProps: {
       attributes: { class: 'tiptap-editor outline-none' },
     },
@@ -70,7 +71,8 @@ export default function NoteEditor({ page, onSave }) {
           key={page.id}
           defaultValue={page.title === 'Sans titre' ? '' : page.title}
           placeholder="Sans titre"
-          onBlur={handleTitleBlur}
+          onFocus={e => { e.target.style.borderBottom = '1px solid var(--muted)' }}
+          onBlur={e => { e.target.style.borderBottom = ''; handleTitleBlur(e) }}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); editor?.commands.focus() } }}
           className="w-full text-3xl font-bold bg-transparent border-none outline-none mb-6 text-nox-text placeholder:text-nox-muted/30"
         />
