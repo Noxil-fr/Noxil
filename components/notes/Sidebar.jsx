@@ -204,26 +204,40 @@ export default function Sidebar({
 }) {
   return (
     <aside className="w-52 shrink-0 bg-nox-surface border-r border-nox-border flex flex-col h-full">
-      <NotebookDropdown
-        notebooks={notebooks}
-        selectedNotebook={selectedNotebook}
-        onSelect={onSelectNotebook}
-        onCreateNotebook={onCreateNotebook}
-        onRenameNotebook={onRenameNotebook}
-        onDeleteNotebook={onDeleteNotebook}
-        onRenameStart={onRenameStart}
-        onRenameEnd={onRenameEnd}
-      />
-      <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
-        <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>
-        {canCreate && (
+      {!quickNotesMode && (
+        <>
+          <NotebookDropdown
+            notebooks={notebooks}
+            selectedNotebook={selectedNotebook}
+            onSelect={onSelectNotebook}
+            onCreateNotebook={onCreateNotebook}
+            onRenameNotebook={onRenameNotebook}
+            onDeleteNotebook={onDeleteNotebook}
+            onRenameStart={onRenameStart}
+            onRenameEnd={onRenameEnd}
+          />
+          <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
+            <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>
+            {canCreate && (
+              <button
+                onClick={onCreatePage}
+                className="text-nox-muted hover:text-nox-accent transition-colors text-lg leading-none pb-0.5"
+                title="Nouvelle page"
+              >+</button>
+            )}
+          </div>
+        </>
+      )}
+      {quickNotesMode && (
+        <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
+          <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Notes rapides</span>
           <button
             onClick={onCreatePage}
             className="text-nox-muted hover:text-nox-accent transition-colors text-lg leading-none pb-0.5"
-            title="Nouvelle page"
+            title="Nouvelle note"
           >+</button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto px-2 py-2">
         <div className="flex flex-col gap-0.5">
           {pages.map(page => (
