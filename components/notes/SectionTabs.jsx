@@ -74,12 +74,17 @@ function SectionTab({ section, isSelected, onSelect, onRename, onColor, onRename
   return (
     <div className="relative shrink-0">
       <div
-        className={`group flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-colors border-b-2 ${
-          isSelected
-            ? 'text-nox-text'
-            : 'border-transparent text-nox-muted hover:text-nox-text hover:border-nox-border/50'
+        className={`group flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent ${
+          isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
         }`}
-        style={isSelected ? { borderColor: color } : {}}
+        style={isSelected
+          ? { backgroundColor: section.color || 'var(--accent)', borderBottomColor: section.color || 'var(--accent)' }
+          : section.color
+            ? { '--hover-bg': `${section.color}22` }
+            : {}
+        }
+        onMouseEnter={e => { if (!isSelected && section.color) e.currentTarget.style.backgroundColor = `${section.color}22` }}
+        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
         onClick={() => { if (!editing) onSelect(section) }}
       >
         {!isSelected && section.color && (
