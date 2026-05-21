@@ -6,6 +6,7 @@ import TopBar from './TopBar'
 import SectionTabs from './SectionTabs'
 import Sidebar from './Sidebar'
 import NoteEditor from './NoteEditor'
+import Notes from '@/components/Notes'
 
 export default function NotesLayout() {
   const [sb, setSb] = useState(null)
@@ -16,8 +17,17 @@ export default function NotesLayout() {
   const [pages, setPages] = useState([])
   const [selectedPage, setSelectedPage] = useState(null)
   const [isRenaming, setIsRenaming] = useState(false)
+  const [quickNotesMode, setQuickNotesMode] = useState(false)
+  const [quickNotes, setQuickNotes] = useState([])
 
   useEffect(() => { setSb(getSupabase()) }, [])
+
+  useEffect(() => {
+    if (!sb) return
+    sb.from('notes').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      setQuickNotes(data || [])
+    })
+  }, [sb])
 
   useEffect(() => {
     if (!sb) return
@@ -131,27 +141,34 @@ export default function NotesLayout() {
           onDeletePage={deletePage}
           onRenameStart={() => setIsRenaming(true)}
           onRenameEnd={() => setIsRenaming(false)}
+          quickNotesMode={quickNotesMode}
+          onToggleQuickNotes={() => setQuickNotesMode(q => !q)}
         />
         <div className="flex-1 overflow-hidden flex flex-col">
-          <SectionTabs
-            sections={sections}
-            selectedSection={selectedSection}
-            hasNotebook={!!selectedNotebook}
-            onSelectSection={setSelectedSection}
-            onCreateSection={createSection}
-            onRenameSection={renameSection}
-            onRenameStart={() => setIsRenaming(true)}
-            onRenameEnd={() => setIsRenaming(false)}
-          />
-          {selectedPage
-            ? <NoteEditor key={selectedPage.id} page={selectedPage} onSave={savePage} editorDisabled={isRenaming} />
-            : (
-              <div className="flex flex-col items-center justify-center h-full gap-3 text-nox-muted">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                <p className="text-sm">{selectedSection ? 'Sélectionne ou crée une page' : 'Sélectionne une section'}</p>
-              </div>
-            )
-          }
+          {!quickNotesMode && (
+            <SectionTabs
+              sections={sections}
+              selectedSection={selectedSection}
+              hasNotebook={!!selectedNotebook}
+              onSelectSection={(s) => { setSelectedSection(s); setQuickNotesMode(false) }}
+              onCreateSection={createSection}
+              onRenameSection={renameSection}
+              onRenameStart={() => setIsRenaming(true)}
+              onRenameEnd={() => setIsRenaming(false)}
+            />
+          )}
+          {quickNotesMode ? (
+            <div className="flex-1 overflow-y-auto px-10 py-8">
+              {sb && <Notes sb={sb} notes={quickNotes} setNotes={setQuickNotes} />}
+            </div>
+          ) : selectedPage ? (
+            <NoteEditor key={selectedPage.id} page={selectedPage} onSave={savePage} editorDisabled={isRenaming} />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-nox-muted">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              <p className="text-sm">{selectedSection ? 'Sélectionne ou crée une page' : 'Sélectionne une section'}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

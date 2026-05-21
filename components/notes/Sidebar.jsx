@@ -126,6 +126,7 @@ export default function Sidebar({
   onSelectNotebook, onCreateNotebook,
   onSelectPage, onCreatePage, onRenamePage, onDeletePage,
   onRenameStart, onRenameEnd,
+  quickNotesMode, onToggleQuickNotes,
 }) {
   return (
     <aside className="w-52 shrink-0 bg-nox-surface border-r border-nox-border flex flex-col h-full">
@@ -137,7 +138,7 @@ export default function Sidebar({
       />
       <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
         <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>
-        {selectedSection && (
+        {selectedSection && !quickNotesMode && (
           <button
             onClick={onCreatePage}
             className="text-nox-muted hover:text-nox-accent transition-colors text-lg leading-none pb-0.5"
@@ -147,7 +148,7 @@ export default function Sidebar({
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-2">
         <div className="flex flex-col gap-0.5">
-          {pages.map(page => (
+          {!quickNotesMode && pages.map(page => (
             <PageItem
               key={page.id}
               page={page}
@@ -159,13 +160,24 @@ export default function Sidebar({
               onRenameEnd={onRenameEnd}
             />
           ))}
-          {pages.length === 0 && selectedSection && (
+          {!quickNotesMode && pages.length === 0 && selectedSection && (
             <p className="text-xs text-nox-muted px-2 py-2">Aucune page</p>
           )}
-          {!selectedSection && (
+          {!quickNotesMode && !selectedSection && (
             <p className="text-xs text-nox-muted px-2 py-2">Sélectionne une section</p>
           )}
         </div>
+      </div>
+      <div className="border-t border-nox-border p-2">
+        <button
+          onClick={onToggleQuickNotes}
+          className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors ${
+            quickNotesMode ? 'bg-nox-accent/15 text-nox-accent' : 'text-nox-muted hover:text-nox-text hover:bg-white/5'
+          }`}
+        >
+          <span>⚡</span>
+          <span>Notes rapides</span>
+        </button>
       </div>
     </aside>
   )
