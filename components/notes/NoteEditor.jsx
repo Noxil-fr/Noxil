@@ -19,6 +19,9 @@ import TableHeader from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight, common } from 'lowlight'
 import Toolbar from './Toolbar'
+import { OneNoteTable } from './OneNoteTableExtension'
+import { FontSize } from './FontSizeExtension'
+import { FontFamily } from './FontFamilyExtension'
 
 const lowlight = createLowlight(common)
 
@@ -42,6 +45,9 @@ export default function NoteEditor({ page, onSave, editorDisabled }) {
       TableHeader,
       TableCell,
       CodeBlockLowlight.configure({ lowlight }),
+      FontFamily,
+      FontSize,
+      OneNoteTable,
     ],
     content: page.content && Object.keys(page.content).length ? page.content : '',
     immediatelyRender: false,

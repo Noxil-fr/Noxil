@@ -5,6 +5,18 @@ import { useState, useRef, useEffect } from 'react'
 const TEXT_COLORS = ['#e6edf3','#f85149','#ff9f43','#ffd43b','#6bcb77','#58a6ff','#a78bfa','#f97fa3','#8b949e','#000000']
 const HIGHLIGHT_COLORS = ['#ffd43b40','#6bcb7740','#58a6ff40','#a78bfa40','#f8514940','#ff9f4340']
 
+const FONT_FAMILIES = [
+  { label: 'Système', value: null },
+  { label: 'Arial', value: 'Arial, sans-serif' },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Times New Roman', value: "'Times New Roman', serif" },
+  { label: 'Consolas', value: "'Consolas', monospace" },
+  { label: 'Calibri', value: "'Calibri', sans-serif" },
+  { label: 'Century Gothic', value: "'Century Gothic', sans-serif" },
+]
+
+const FONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48]
+
 function Btn({ active, onClick, title, children, className = '' }) {
   return (
     <button
@@ -63,6 +75,45 @@ function ColorPopover({ colors, onSelect, onReset, label, children }) {
           >
             Effacer
           </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function FontSelect({ value, options, onChange, width, renderLabel }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const close = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  const current = options.find(o => String(o.value) === String(value))
+
+  return (
+    <div className="relative shrink-0" ref={ref} style={{ width }}>
+      <button
+        onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
+        className="w-full text-left px-1.5 py-0.5 rounded text-[12px] text-nox-text bg-nox-surface border border-nox-border hover:border-nox-accent truncate"
+        style={{ fontFamily: current?.style || 'inherit' }}
+      >
+        {current ? renderLabel(current) : options[0] ? renderLabel(options[0]) : '—'}
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-nox-surface border border-nox-border rounded-lg shadow-lg py-1" style={{ minWidth: width }}>
+          {options.map(opt => (
+            <button
+              key={opt.label}
+              onMouseDown={e => { e.preventDefault(); onChange(opt.value); setOpen(false) }}
+              className={`w-full text-left px-3 py-1 text-[12px] hover:bg-white/5 whitespace-nowrap ${String(opt.value) === String(value) ? 'text-nox-accent' : 'text-nox-text'}`}
+              style={{ fontFamily: opt.style || 'inherit' }}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       )}
     </div>
@@ -131,8 +182,36 @@ export default function Toolbar({ editor }) {
 
   const e = editor.chain().focus()
 
+  const currentFamily = editor.getAttributes('textStyle').fontFamily || ''
+  const currentSize = editor.getAttributes('textStyle').fontSize || ''
+
+  const familyOptions = FONT_FAMILIES.map(f => ({ ...f, value: f.value || '', style: f.value }))
+  const sizeOptions = [{ label: '—', value: '' }, ...FONT_SIZES.map(s => ({ label: String(s), value: String(s) }))]
+
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-4 py-2 border-b border-nox-border bg-nox-surface shrink-0">
+
+      {/* Police & taille */}
+      <FontSelect
+        value={currentFamily}
+        options={familyOptions}
+        onChange={v => v
+          ? editor.chain().focus().setMark('textStyle', { fontFamily: v }).run()
+          : editor.chain().focus().setMark('textStyle', { fontFamily: null }).removeEmptyTextStyle().run()}
+        width={120}
+        renderLabel={opt => opt.label}
+      />
+      <FontSelect
+        value={currentSize}
+        options={sizeOptions}
+        onChange={v => v
+          ? editor.chain().focus().setMark('textStyle', { fontSize: v }).run()
+          : editor.chain().focus().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run()}
+        width={56}
+        renderLabel={opt => opt.label}
+      />
+
+      <Divider />
 
       {/* Historique */}
       <Btn onClick={() => e.undo().run()} title="Annuler (Ctrl+Z)">

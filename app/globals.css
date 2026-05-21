@@ -129,9 +129,9 @@ body {
 .tiptap-link:hover { opacity: 0.8; }
 
 /* Tables */
-.tiptap-editor table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-.tiptap-editor th, .tiptap-editor td { border: 1px solid var(--border); padding: 0.5em 0.75em; min-width: 80px; vertical-align: top; }
-.tiptap-editor th { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); font-weight: 600; text-align: left; }
+.tiptap-editor table { border-collapse: collapse; width: auto; margin: 0.5em 0; }
+.tiptap-editor th, .tiptap-editor td { border: 1px solid #8b949e; padding: 0.1em 0.5em; min-width: 20px; vertical-align: middle; }
+.tiptap-editor th { font-weight: 400; text-align: left; }
 .tiptap-editor .selectedCell { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
 .tiptap-editor .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: var(--accent); cursor: col-resize; pointer-events: auto; }
 .tiptap-editor .tableWrapper { overflow-x: auto; }
