@@ -14,7 +14,7 @@ export default function ProjectGrid({ projects }) {
           onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
         >
           <div>
-            <div className="text-xl font-semibold">{p.name}</div>
+            <div className="text-xl font-semibold" style={{ fontFamily: "'Century Gothic', sans-serif" }}>{p.name}</div>
             <div className="text-[13px] text-nox-muted">{p.url.replace('https://', '')}</div>
           </div>
           <span
