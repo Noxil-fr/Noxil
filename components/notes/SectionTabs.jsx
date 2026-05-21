@@ -43,7 +43,7 @@ function SectionTab({ section, isSelected, onSelect, onRename, onDelete, onRenam
   return (
     <div className="relative shrink-0">
       <div
-        className={`flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 ${
+        className={`flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 rounded-t-lg ${
           isSelected ? 'text-white' : 'text-white/60 hover:text-white/90'
         }`}
         style={isSelected
