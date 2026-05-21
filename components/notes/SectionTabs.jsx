@@ -1,20 +1,21 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import ContextMenu from './ContextMenu'
 
 const COLORS = [
   '#c0392b', '#a84300', '#1e8449', '#1a5276',
   '#6c3483', '#0e6655', '#7b241c', '#196f3d',
 ]
 
-function SectionTab({ section, isSelected, onSelect, onRename, onRenameStart, onRenameEnd }) {
+function SectionTab({ section, isSelected, onSelect, onRename, onDelete, onRenameStart, onRenameEnd }) {
   const [editing, setEditing] = useState(false)
+  const [contextMenu, setContextMenu] = useState(null)
   const [value, setValue] = useState(section.name)
   const inputRef = useRef(null)
   const color = section.color || '#1a5276'
 
-  const startEdit = (e) => {
-    e.stopPropagation()
+  const startEdit = () => {
     setValue(section.name)
     onRenameStart?.()
     setEditing(true)
@@ -34,39 +35,52 @@ function SectionTab({ section, isSelected, onSelect, onRename, onRenameStart, on
     setValue(section.name)
   }
 
+  const handleContextMenu = (e) => {
+    e.preventDefault()
+    setContextMenu({ x: e.clientX, y: e.clientY })
+  }
+
   return (
-    <div
-      className={`group flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent shrink-0 ${
-        isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
-      }`}
-      style={isSelected ? { backgroundColor: color, borderBottomColor: color } : {}}
-      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}22` }}
-      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
-      onClick={() => { if (!editing) onSelect(section) }}
-    >
-      {editing ? (
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onBlur={commit}
-          onKeyDown={e => {
-            if (e.key === 'Enter') { e.preventDefault(); commit() }
-            if (e.key === 'Escape') cancel()
-          }}
-          onClick={e => e.stopPropagation()}
-          className="text-sm w-28 bg-black/20 border border-white/30 rounded px-1 py-0.5 outline-none text-white"
-          style={{ fontFamily: 'inherit' }}
+    <div className="relative shrink-0">
+      <div
+        className={`flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent ${
+          isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
+        }`}
+        style={isSelected ? { backgroundColor: color, borderBottomColor: color } : {}}
+        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}22` }}
+        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
+        onClick={() => { if (!editing) onSelect(section) }}
+        onContextMenu={handleContextMenu}
+      >
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onBlur={commit}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { e.preventDefault(); commit() }
+              if (e.key === 'Escape') cancel()
+            }}
+            onClick={e => e.stopPropagation()}
+            className="text-sm w-28 bg-black/20 border border-white/30 rounded px-1 py-0.5 outline-none text-white"
+            style={{ fontFamily: 'inherit' }}
+          />
+        ) : (
+          <span className="text-sm whitespace-nowrap">{section.name}</span>
+        )}
+      </div>
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          items={[
+            { icon: '✎', label: 'Renommer', action: startEdit },
+            { separator: true },
+            { icon: '🗑', label: 'Supprimer', danger: true, action: () => onDelete(section.id) },
+          ]}
         />
-      ) : (
-        <span className="text-sm whitespace-nowrap">{section.name}</span>
-      )}
-      {isSelected && !editing && (
-        <button
-          onClick={startEdit}
-          className="opacity-0 group-hover:opacity-100 text-white/60 hover:text-white text-xs transition-opacity"
-          title="Renommer"
-        >✎</button>
       )}
     </div>
   )
@@ -74,7 +88,7 @@ function SectionTab({ section, isSelected, onSelect, onRename, onRenameStart, on
 
 export default function SectionTabs({
   sections, selectedSection, hasNotebook,
-  onSelectSection, onCreateSection, onRenameSection,
+  onSelectSection, onCreateSection, onRenameSection, onDeleteSection,
   onRenameStart, onRenameEnd,
 }) {
   return (
@@ -86,6 +100,7 @@ export default function SectionTabs({
           isSelected={selectedSection?.id === s.id}
           onSelect={onSelectSection}
           onRename={onRenameSection}
+          onDelete={onDeleteSection}
           onRenameStart={onRenameStart}
           onRenameEnd={onRenameEnd}
         />

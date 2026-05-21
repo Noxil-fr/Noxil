@@ -1,21 +1,21 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
+import ContextMenu from './ContextMenu'
 
 function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNotebook }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
-  useEffect(() => {
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
-
   return (
-    <div ref={ref} className="relative border-b border-nox-border">
+    <div
+      ref={ref}
+      className="relative border-b border-nox-border"
+      onBlur={() => setTimeout(() => { if (!ref.current?.contains(document.activeElement)) setOpen(false) }, 100)}
+    >
       <button
         onClick={() => setOpen(o => !o)}
+        onBlur={() => {}}
         className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-white/5 text-nox-text transition-colors"
       >
         <span className="text-sm font-semibold flex-1 text-left truncate">
@@ -24,7 +24,10 @@ function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNoteb
         <span className="text-nox-muted text-[10px] shrink-0">▾</span>
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 bg-nox-surface border border-nox-border rounded-xl shadow-2xl py-1 w-full min-w-48">
+        <div
+          className="absolute left-0 top-full z-50 bg-nox-surface border border-nox-border rounded-xl shadow-2xl py-1 w-full min-w-48"
+          onMouseDown={e => e.stopPropagation()}
+        >
           {notebooks.map(nb => (
             <button
               key={nb.id}
@@ -54,11 +57,11 @@ function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNoteb
 
 function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStart, onRenameEnd }) {
   const [editing, setEditing] = useState(false)
+  const [contextMenu, setContextMenu] = useState(null)
   const [value, setValue] = useState(page.title || 'Sans titre')
   const inputRef = useRef(null)
 
-  const startEdit = (e) => {
-    e.stopPropagation()
+  const startEdit = () => {
     setValue(page.title || 'Sans titre')
     onRenameStart?.()
     setEditing(true)
@@ -78,12 +81,18 @@ function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStar
     setValue(page.title || 'Sans titre')
   }
 
+  const handleContextMenu = (e) => {
+    e.preventDefault()
+    setContextMenu({ x: e.clientX, y: e.clientY })
+  }
+
   return (
     <div
-      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+      className={`flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer transition-colors ${
         isSelected ? 'bg-nox-accent/15 text-nox-accent' : 'text-nox-text hover:bg-white/5'
       }`}
       onClick={() => { if (!editing) onSelect(page) }}
+      onContextMenu={handleContextMenu}
     >
       {page.is_pinned && <span className="text-[10px] shrink-0">📌</span>}
       {editing ? (
@@ -103,19 +112,17 @@ function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStar
       ) : (
         <span className="flex-1 text-sm truncate">{page.title || 'Sans titre'}</span>
       )}
-      {isSelected && !editing && (
-        <button
-          onClick={startEdit}
-          className="opacity-0 group-hover:opacity-100 text-nox-muted hover:text-nox-text text-xs px-1 transition-opacity shrink-0"
-          title="Renommer"
-        >✎</button>
-      )}
-      {!editing && (
-        <button
-          onClick={e => { e.stopPropagation(); onDelete(page.id) }}
-          className="opacity-0 group-hover:opacity-100 text-nox-muted hover:text-danger text-xs px-1 py-0.5 rounded hover:bg-white/10 transition-opacity shrink-0"
-          title="Supprimer"
-        >✕</button>
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          items={[
+            { icon: '✎', label: 'Renommer', action: startEdit },
+            { separator: true },
+            { icon: '🗑', label: 'Supprimer', danger: true, action: () => onDelete(page.id) },
+          ]}
+        />
       )}
     </div>
   )

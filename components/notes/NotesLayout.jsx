@@ -80,6 +80,17 @@ export default function NotesLayout() {
     if (selectedNotebook?.id === id) setSelectedNotebook(prev => ({ ...prev, name }))
   }
 
+  const deleteSection = async (id) => {
+    await sb.from('sections').delete().eq('id', id)
+    const remaining = sections.filter(s => s.id !== id)
+    setSections(remaining)
+    if (selectedSection?.id === id) {
+      setSelectedSection(remaining[0] ?? null)
+      setPages([])
+      setSelectedPage(null)
+    }
+  }
+
   const createSection = async () => {
     if (!selectedNotebook) return
     const color = COLORS[sections.length % COLORS.length]
@@ -183,6 +194,7 @@ const createPage = async () => {
               onSelectSection={(s) => { setSelectedSection(s); setQuickNotesMode(false) }}
               onCreateSection={createSection}
               onRenameSection={renameSection}
+              onDeleteSection={deleteSection}
               onRenameStart={() => setIsRenaming(true)}
               onRenameEnd={() => setIsRenaming(false)}
             />
