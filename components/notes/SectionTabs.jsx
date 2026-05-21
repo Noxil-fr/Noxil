@@ -43,12 +43,15 @@ function SectionTab({ section, isSelected, onSelect, onRename, onDelete, onRenam
   return (
     <div className="relative shrink-0">
       <div
-        className={`flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent ${
-          isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
+        className={`flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 ${
+          isSelected ? 'text-white' : 'text-white/60 hover:text-white/90'
         }`}
-        style={isSelected ? { backgroundColor: color, borderBottomColor: color } : {}}
-        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}22` }}
-        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
+        style={isSelected
+          ? { backgroundColor: color, borderColor: color }
+          : { backgroundColor: `${color}40`, borderColor: 'transparent' }
+        }
+        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}60` }}
+        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}40` }}
         onClick={() => { if (!editing) onSelect(section) }}
         onContextMenu={handleContextMenu}
       >

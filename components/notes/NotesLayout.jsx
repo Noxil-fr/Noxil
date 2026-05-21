@@ -1,12 +1,37 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import TopBar from './TopBar'
 import SectionTabs, { COLORS } from './SectionTabs'
 import Sidebar from './Sidebar'
 import NoteEditor from './NoteEditor'
 import QuickNoteEditor from './QuickNoteEditor'
+
+function NotebookCreateModal({ onConfirm, onCancel }) {
+  const [value, setValue] = useState('')
+  const inputRef = useRef(null)
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 0) }, [])
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onMouseDown={e => { if (e.target === e.currentTarget) onCancel() }}>
+      <div className="bg-nox-surface border border-nox-border rounded-xl p-5 w-72 shadow-2xl">
+        <p className="text-xs text-nox-muted uppercase tracking-wider mb-3">Nouveau carnet</p>
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          placeholder="Nom du carnet"
+          onKeyDown={e => { if (e.key === 'Enter' && value.trim()) onConfirm(value.trim()); if (e.key === 'Escape') onCancel() }}
+          className="w-full bg-nox-bg border border-nox-accent rounded-lg px-3 py-2 text-sm text-nox-text outline-none"
+        />
+        <div className="flex gap-2 mt-4 justify-end">
+          <button onClick={onCancel} className="text-xs text-nox-muted px-3 py-1.5 rounded hover:text-nox-text transition-colors">Annuler</button>
+          <button onClick={() => value.trim() && onConfirm(value.trim())} className="text-xs bg-nox-accent text-white rounded-lg px-4 py-1.5 hover:opacity-80 font-medium transition-opacity">Créer</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function NotesLayout() {
   const [sb, setSb] = useState(null)
@@ -17,6 +42,7 @@ export default function NotesLayout() {
   const [pages, setPages] = useState([])
   const [selectedPage, setSelectedPage] = useState(null)
   const [isRenaming, setIsRenaming] = useState(false)
+  const [showCreateNotebook, setShowCreateNotebook] = useState(false)
   const [quickNotesMode, setQuickNotesMode] = useState(false)
   const [quickNotes, setQuickNotes] = useState([])
   const [selectedQuickNote, setSelectedQuickNote] = useState(null)
@@ -65,9 +91,10 @@ export default function NotesLayout() {
       })
   }, [sb, selectedSection?.id])
 
-  const createNotebook = async () => {
+  const createNotebook = async (name) => {
+    setShowCreateNotebook(false)
     const { data, error } = await sb.from('notebooks')
-      .insert({ name: 'Nouveau carnet', position: notebooks.length })
+      .insert({ name, position: notebooks.length })
       .select().single()
     if (error || !data) { console.error('createNotebook:', error?.message); return }
     setNotebooks(prev => [...prev, data])
@@ -193,7 +220,7 @@ const createPage = async () => {
           selectedSection={selectedSection}
           canCreate={sidebarCanCreate}
           onSelectNotebook={(nb) => { setSelectedNotebook(nb); setQuickNotesMode(false) }}
-          onCreateNotebook={createNotebook}
+          onCreateNotebook={() => setShowCreateNotebook(true)}
           onRenameNotebook={renameNotebook}
           onDeleteNotebook={deleteNotebook}
           onSelectPage={sidebarOnSelectPage}
@@ -238,5 +265,11 @@ const createPage = async () => {
         </div>
       </div>
     </div>
+    {showCreateNotebook && (
+      <NotebookCreateModal
+        onConfirm={createNotebook}
+        onCancel={() => setShowCreateNotebook(false)}
+      />
+    )}
   )
 }
