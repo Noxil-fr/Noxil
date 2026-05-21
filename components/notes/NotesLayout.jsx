@@ -72,6 +72,10 @@ export default function NotesLayout() {
     if (error || !data) { console.error('createNotebook:', error?.message); return }
     setNotebooks(prev => [...prev, data])
     setSelectedNotebook(data)
+    const { data: section } = await sb.from('sections')
+      .insert({ notebook_id: data.id, name: 'Général', position: 0, color: COLORS[0] })
+      .select().single()
+    if (section) { setSections([section]); setSelectedSection(section) }
   }
 
   const deleteNotebook = async (id) => {
@@ -94,6 +98,7 @@ export default function NotesLayout() {
   }
 
   const deleteSection = async (id) => {
+    if (sections.length <= 1) return
     await sb.from('sections').delete().eq('id', id)
     const remaining = sections.filter(s => s.id !== id)
     setSections(remaining)
