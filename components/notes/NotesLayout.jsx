@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import TopBar from './TopBar'
-import SectionTabs from './SectionTabs'
+import SectionTabs, { COLORS } from './SectionTabs'
 import Sidebar from './Sidebar'
 import NoteEditor from './NoteEditor'
 import QuickNoteEditor from './QuickNoteEditor'
@@ -82,8 +82,9 @@ export default function NotesLayout() {
 
   const createSection = async () => {
     if (!selectedNotebook) return
+    const color = COLORS[sections.length % COLORS.length]
     const { data, error } = await sb.from('sections')
-      .insert({ notebook_id: selectedNotebook.id, name: 'Nouvelle section', position: sections.length })
+      .insert({ notebook_id: selectedNotebook.id, name: 'Nouvelle section', position: sections.length, color })
       .select().single()
     if (error || !data) { console.error('createSection:', error?.message); return }
     setSections(prev => [...prev, data])
@@ -96,13 +97,7 @@ export default function NotesLayout() {
     if (selectedSection?.id === id) setSelectedSection(prev => ({ ...prev, name }))
   }
 
-  const colorSection = async (id, color) => {
-    await sb.from('sections').update({ color }).eq('id', id)
-    setSections(prev => prev.map(s => s.id === id ? { ...s, color } : s))
-    if (selectedSection?.id === id) setSelectedSection(prev => ({ ...prev, color }))
-  }
-
-  const createPage = async () => {
+const createPage = async () => {
     if (!selectedSection) return
     const { data, error } = await sb.from('pages')
       .insert({ section_id: selectedSection.id, title: 'Sans titre', content: {}, position: pages.length })
@@ -188,7 +183,6 @@ export default function NotesLayout() {
               onSelectSection={(s) => { setSelectedSection(s); setQuickNotesMode(false) }}
               onCreateSection={createSection}
               onRenameSection={renameSection}
-              onColorSection={colorSection}
               onRenameStart={() => setIsRenaming(true)}
               onRenameEnd={() => setIsRenaming(false)}
             />

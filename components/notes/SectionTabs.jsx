@@ -1,54 +1,17 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 
 const COLORS = [
-  '#c0392b', '#a84300', '#9a7d0a', '#1e8449',
-  '#1a5276', '#6c3483', '#0e6655', '#7b241c',
-  '#922b21', '#6e2f00', '#7d6608', '#196f3d',
+  '#c0392b', '#a84300', '#1e8449', '#1a5276',
+  '#6c3483', '#0e6655', '#7b241c', '#196f3d',
 ]
 
-function ColorPicker({ current, onSelect, onClose }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [onClose])
-
-  return (
-    <div ref={ref} className="absolute top-full left-0 mt-1 z-50 bg-nox-surface border border-nox-border rounded-xl p-3 shadow-2xl">
-      <div className="grid grid-cols-6 gap-2 mb-2">
-        {COLORS.map(c => (
-          <button
-            key={c}
-            onClick={() => onSelect(c)}
-            className="w-5 h-5 rounded-full transition-transform hover:scale-125"
-            style={{
-              background: c,
-              outline: current === c ? `2px solid ${c}` : 'none',
-              outlineOffset: '2px',
-            }}
-          />
-        ))}
-      </div>
-      <button
-        onClick={() => onSelect(null)}
-        className="w-full text-[11px] text-nox-muted hover:text-nox-text transition-colors text-center"
-      >
-        Aucune couleur
-      </button>
-    </div>
-  )
-}
-
-function SectionTab({ section, isSelected, onSelect, onRename, onColor, onRenameStart, onRenameEnd }) {
+function SectionTab({ section, isSelected, onSelect, onRename, onRenameStart, onRenameEnd }) {
   const [editing, setEditing] = useState(false)
-  const [showColorPicker, setShowColorPicker] = useState(false)
   const [value, setValue] = useState(section.name)
   const inputRef = useRef(null)
-  const color = section.color || 'var(--accent)'
+  const color = section.color || '#1a5276'
 
   const startEdit = (e) => {
     e.stopPropagation()
@@ -72,63 +35,38 @@ function SectionTab({ section, isSelected, onSelect, onRename, onColor, onRename
   }
 
   return (
-    <div className="relative shrink-0">
-      <div
-        className={`group flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent ${
-          isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
-        }`}
-        style={isSelected
-          ? { backgroundColor: section.color || 'var(--accent)', borderBottomColor: section.color || 'var(--accent)' }
-          : section.color
-            ? { '--hover-bg': `${section.color}22` }
-            : {}
-        }
-        onMouseEnter={e => { if (!isSelected && section.color) e.currentTarget.style.backgroundColor = `${section.color}22` }}
-        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
-        onClick={() => { if (!editing) onSelect(section) }}
-      >
-        {!isSelected && section.color && (
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: section.color }} />
-        )}
-        {editing ? (
-          <input
-            ref={inputRef}
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            onBlur={commit}
-            onKeyDown={e => {
-              if (e.key === 'Enter') { e.preventDefault(); commit() }
-              if (e.key === 'Escape') cancel()
-            }}
-            onClick={e => e.stopPropagation()}
-            className="text-sm w-28 bg-nox-bg border border-nox-accent rounded px-1 py-0.5 outline-none text-nox-accent"
-            style={{ fontFamily: 'inherit' }}
-          />
-        ) : (
-          <span className="text-sm whitespace-nowrap">{section.name}</span>
-        )}
-        {isSelected && !editing && (
-          <>
-            <button
-              onClick={startEdit}
-              className="opacity-0 group-hover:opacity-100 text-nox-muted hover:text-nox-text text-xs transition-opacity"
-              title="Renommer"
-            >✎</button>
-            <button
-              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); setShowColorPicker(p => !p) }}
-              className="opacity-0 group-hover:opacity-100 w-3 h-3 rounded-full shrink-0 transition-opacity border-2 border-white/40"
-              style={{ background: section.color || '#58a6ff' }}
-              title="Couleur de la section"
-            />
-          </>
-        )}
-      </div>
-      {showColorPicker && (
-        <ColorPicker
-          current={section.color}
-          onSelect={(c) => { onColor(section.id, c); setShowColorPicker(false) }}
-          onClose={() => setShowColorPicker(false)}
+    <div
+      className={`group flex items-center gap-1.5 px-4 py-2 cursor-pointer transition-all border-b-2 border-transparent shrink-0 ${
+        isSelected ? 'text-white' : 'text-nox-muted hover:text-nox-text'
+      }`}
+      style={isSelected ? { backgroundColor: color, borderBottomColor: color } : {}}
+      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = `${color}22` }}
+      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
+      onClick={() => { if (!editing) onSelect(section) }}
+    >
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit() }
+            if (e.key === 'Escape') cancel()
+          }}
+          onClick={e => e.stopPropagation()}
+          className="text-sm w-28 bg-black/20 border border-white/30 rounded px-1 py-0.5 outline-none text-white"
+          style={{ fontFamily: 'inherit' }}
         />
+      ) : (
+        <span className="text-sm whitespace-nowrap">{section.name}</span>
+      )}
+      {isSelected && !editing && (
+        <button
+          onClick={startEdit}
+          className="opacity-0 group-hover:opacity-100 text-white/60 hover:text-white text-xs transition-opacity"
+          title="Renommer"
+        >✎</button>
       )}
     </div>
   )
@@ -136,7 +74,7 @@ function SectionTab({ section, isSelected, onSelect, onRename, onColor, onRename
 
 export default function SectionTabs({
   sections, selectedSection, hasNotebook,
-  onSelectSection, onCreateSection, onRenameSection, onColorSection,
+  onSelectSection, onCreateSection, onRenameSection,
   onRenameStart, onRenameEnd,
 }) {
   return (
@@ -148,7 +86,6 @@ export default function SectionTabs({
           isSelected={selectedSection?.id === s.id}
           onSelect={onSelectSection}
           onRename={onRenameSection}
-          onColor={onColorSection}
           onRenameStart={onRenameStart}
           onRenameEnd={onRenameEnd}
         />
@@ -163,3 +100,5 @@ export default function SectionTabs({
     </div>
   )
 }
+
+export { COLORS }
