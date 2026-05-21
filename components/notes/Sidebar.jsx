@@ -1,21 +1,22 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ContextMenu from './ContextMenu'
 
 function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNotebook }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
+  useEffect(() => {
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
   return (
-    <div
-      ref={ref}
-      className="relative border-b border-nox-border"
-      onBlur={() => setTimeout(() => { if (!ref.current?.contains(document.activeElement)) setOpen(false) }, 100)}
-    >
+    <div ref={ref} className="relative border-b border-nox-border">
       <button
         onClick={() => setOpen(o => !o)}
-        onBlur={() => {}}
         className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-white/5 text-nox-text transition-colors"
       >
         <span className="text-sm font-semibold flex-1 text-left truncate">
