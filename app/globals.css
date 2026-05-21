@@ -152,6 +152,13 @@ body {
 .hljs-punctuation { color: #e6edf3; }
 .hljs-operator { color: #ff7b72; }
 
+/* Custom scrollbar */
+.scrollbar-thin::-webkit-scrollbar { height: 3px; width: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
 /* Task list */
 .tiptap-editor ul[data-type="taskList"] { list-style: none; padding-left: 0.25em; }
 .tiptap-editor ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5em; }

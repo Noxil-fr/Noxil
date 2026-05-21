@@ -97,7 +97,7 @@ export default function SectionTabs({
   return (
     <div className="relative bg-nox-surface border-b border-nox-border shrink-0">
       <div
-        className="flex items-end overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex items-end overflow-x-auto scrollbar-thin"
         onWheel={e => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; e.preventDefault() } }}
       >
         {sections.map(s => (
