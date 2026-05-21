@@ -51,7 +51,7 @@ export default function HubPage() {
               onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
             >
               <div>
-                <div className="text-xl font-semibold">Notes.</div>
+                <div className="text-xl font-semibold" style={{ fontFamily: "'Century Gothic', sans-serif" }}>Jarvis.</div>
                 <div className="text-[13px] text-nox-muted">Carnets & pages</div>
               </div>
               <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#a78bfa' }} />
