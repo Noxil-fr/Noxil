@@ -96,6 +96,12 @@ export default function NotesLayout() {
     if (selectedSection?.id === id) setSelectedSection(prev => ({ ...prev, name }))
   }
 
+  const colorSection = async (id, color) => {
+    await sb.from('sections').update({ color }).eq('id', id)
+    setSections(prev => prev.map(s => s.id === id ? { ...s, color } : s))
+    if (selectedSection?.id === id) setSelectedSection(prev => ({ ...prev, color }))
+  }
+
   const createPage = async () => {
     if (!selectedSection) return
     const { data, error } = await sb.from('pages')
@@ -182,6 +188,7 @@ export default function NotesLayout() {
               onSelectSection={(s) => { setSelectedSection(s); setQuickNotesMode(false) }}
               onCreateSection={createSection}
               onRenameSection={renameSection}
+              onColorSection={colorSection}
               onRenameStart={() => setIsRenaming(true)}
               onRenameEnd={() => setIsRenaming(false)}
             />
