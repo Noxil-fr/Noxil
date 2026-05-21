@@ -209,6 +209,7 @@ const createPage = async () => {
   const sidebarCanCreate = quickNotesMode ? true : !!selectedSection
 
   return (
+    <>
     <div className="flex flex-col h-screen overflow-hidden bg-nox-bg">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
@@ -271,5 +272,6 @@ const createPage = async () => {
         onCancel={() => setShowCreateNotebook(false)}
       />
     )}
+    </>
   )
 }
