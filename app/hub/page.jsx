@@ -36,13 +36,7 @@ export default function HubPage() {
       <main className="py-8 flex flex-col gap-9">
         <ContactList contacts={contacts} />
         <div className="section-divider">
-          <ProjectGrid projects={projects} />
-        </div>
-        <div className="section-divider">
-          {sb && <Notes sb={sb} notes={notes} setNotes={setNotes} />}
-        </div>
-        <div className="section-divider">
-          <div className="grid grid-cols-2 gap-5">
+          <ProjectGrid projects={projects}>
             <Link
               href="/notes"
               className="flex flex-row items-center justify-between gap-3 bg-nox-surface border border-nox-border rounded-lg px-4 py-2.5 no-underline text-nox-text transition-[border-color,box-shadow] duration-150"
@@ -56,7 +50,10 @@ export default function HubPage() {
               </div>
               <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#a78bfa' }} />
             </Link>
-          </div>
+          </ProjectGrid>
+        </div>
+        <div className="section-divider">
+          {sb && <Notes sb={sb} notes={notes} setNotes={setNotes} />}
         </div>
       </main>
     </div>

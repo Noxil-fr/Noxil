@@ -1,5 +1,5 @@
-export default function ProjectGrid({ projects }) {
-  if (!projects.length) return null
+export default function ProjectGrid({ projects, children }) {
+  if (!projects.length && !children) return null
   return (
     <div className="grid grid-cols-2 gap-5">
       {projects.map(p => (
@@ -23,6 +23,7 @@ export default function ProjectGrid({ projects }) {
           />
         </a>
       ))}
+      {children}
     </div>
   )
 }
