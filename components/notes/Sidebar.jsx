@@ -3,7 +3,76 @@
 import { useState, useRef, useEffect } from 'react'
 import ContextMenu from './ContextMenu'
 
-function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNotebook }) {
+function NotebookItem({ notebook, isSelected, onSelect, onRename, onDelete, onRenameStart, onRenameEnd }) {
+  const [editing, setEditing] = useState(false)
+  const [contextMenu, setContextMenu] = useState(null)
+  const [value, setValue] = useState(notebook.name)
+  const inputRef = useRef(null)
+
+  const startEdit = () => {
+    setValue(notebook.name)
+    onRenameStart?.()
+    setEditing(true)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  const commit = () => {
+    setEditing(false)
+    onRenameEnd?.()
+    const trimmed = value.trim()
+    if (trimmed && trimmed !== notebook.name) onRename(notebook.id, trimmed)
+  }
+
+  const cancel = () => {
+    setEditing(false)
+    onRenameEnd?.()
+    setValue(notebook.name)
+  }
+
+  return (
+    <div
+      className={`relative flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/5 transition-colors cursor-pointer ${
+        isSelected ? 'text-nox-accent' : 'text-nox-text'
+      }`}
+      onClick={() => { if (!editing) onSelect(notebook) }}
+      onContextMenu={e => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY }) }}
+    >
+      <span>{notebook.icon || '📓'}</span>
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit() }
+            if (e.key === 'Escape') cancel()
+          }}
+          onClick={e => e.stopPropagation()}
+          className="flex-1 text-sm bg-nox-bg border border-nox-accent rounded px-1 py-0.5 outline-none text-nox-accent min-w-0"
+          style={{ fontFamily: 'inherit' }}
+        />
+      ) : (
+        <span className="truncate flex-1">{notebook.name}</span>
+      )}
+      {isSelected && !editing && <span className="text-[10px] shrink-0">✓</span>}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          items={[
+            { icon: '✎', label: 'Renommer', action: startEdit },
+            { separator: true },
+            { icon: '🗑', label: 'Supprimer', danger: true, action: () => onDelete(notebook.id) },
+          ]}
+        />
+      )}
+    </div>
+  )
+}
+
+function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNotebook, onRenameNotebook, onDeleteNotebook, onRenameStart, onRenameEnd }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -25,22 +94,18 @@ function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNoteb
         <span className="text-nox-muted text-[10px] shrink-0">▾</span>
       </button>
       {open && (
-        <div
-          className="absolute left-0 top-full z-50 bg-nox-surface border border-nox-border rounded-xl shadow-2xl py-1 w-full min-w-48"
-          onMouseDown={e => e.stopPropagation()}
-        >
+        <div className="absolute left-0 top-full z-50 bg-nox-surface border border-nox-border rounded-xl shadow-2xl py-1 w-full min-w-48">
           {notebooks.map(nb => (
-            <button
+            <NotebookItem
               key={nb.id}
-              onClick={() => { onSelect(nb); setOpen(false) }}
-              className={`w-full text-left flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/5 transition-colors ${
-                selectedNotebook?.id === nb.id ? 'text-nox-accent' : 'text-nox-text'
-              }`}
-            >
-              <span>{nb.icon || '📓'}</span>
-              <span className="truncate flex-1">{nb.name}</span>
-              {selectedNotebook?.id === nb.id && <span className="text-[10px]">✓</span>}
-            </button>
+              notebook={nb}
+              isSelected={selectedNotebook?.id === nb.id}
+              onSelect={(nb) => { onSelect(nb); setOpen(false) }}
+              onRename={onRenameNotebook}
+              onDelete={(id) => { onDeleteNotebook(id); setOpen(false) }}
+              onRenameStart={onRenameStart}
+              onRenameEnd={onRenameEnd}
+            />
           ))}
           <div className="h-px bg-nox-border mx-2 my-1" />
           <button
@@ -132,7 +197,7 @@ function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStar
 export default function Sidebar({
   notebooks, selectedNotebook, pages, selectedPage,
   canCreate,
-  onSelectNotebook, onCreateNotebook,
+  onSelectNotebook, onCreateNotebook, onRenameNotebook, onDeleteNotebook,
   onSelectPage, onCreatePage, onRenamePage, onDeletePage,
   onRenameStart, onRenameEnd,
   quickNotesMode, onToggleQuickNotes,
@@ -144,6 +209,10 @@ export default function Sidebar({
         selectedNotebook={selectedNotebook}
         onSelect={onSelectNotebook}
         onCreateNotebook={onCreateNotebook}
+        onRenameNotebook={onRenameNotebook}
+        onDeleteNotebook={onDeleteNotebook}
+        onRenameStart={onRenameStart}
+        onRenameEnd={onRenameEnd}
       />
       <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
         <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>

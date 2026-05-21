@@ -74,6 +74,19 @@ export default function NotesLayout() {
     setSelectedNotebook(data)
   }
 
+  const deleteNotebook = async (id) => {
+    await sb.from('notebooks').delete().eq('id', id)
+    const remaining = notebooks.filter(n => n.id !== id)
+    setNotebooks(remaining)
+    if (selectedNotebook?.id === id) {
+      setSelectedNotebook(remaining[0] ?? null)
+      setSections([])
+      setSelectedSection(null)
+      setPages([])
+      setSelectedPage(null)
+    }
+  }
+
   const renameNotebook = async (id, name) => {
     await sb.from('notebooks').update({ name }).eq('id', id)
     setNotebooks(prev => prev.map(n => n.id === id ? { ...n, name } : n))
@@ -176,6 +189,8 @@ const createPage = async () => {
           canCreate={sidebarCanCreate}
           onSelectNotebook={(nb) => { setSelectedNotebook(nb); setQuickNotesMode(false) }}
           onCreateNotebook={createNotebook}
+          onRenameNotebook={renameNotebook}
+          onDeleteNotebook={deleteNotebook}
           onSelectPage={sidebarOnSelectPage}
           onCreatePage={sidebarOnCreatePage}
           onRenamePage={sidebarOnRenamePage}
