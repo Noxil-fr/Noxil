@@ -95,26 +95,32 @@ export default function SectionTabs({
   onRenameStart, onRenameEnd,
 }) {
   return (
-    <div className="flex items-end bg-nox-surface border-b border-nox-border shrink-0 overflow-x-auto">
-      {sections.map(s => (
-        <SectionTab
-          key={s.id}
-          section={s}
-          isSelected={selectedSection?.id === s.id}
-          onSelect={onSelectSection}
-          onRename={onRenameSection}
-          onDelete={onDeleteSection}
-          onRenameStart={onRenameStart}
-          onRenameEnd={onRenameEnd}
-        />
-      ))}
-      {hasNotebook && (
-        <button
-          onClick={onCreateSection}
-          className="text-nox-muted hover:text-nox-accent transition-colors text-xl px-3 pb-1.5 shrink-0"
-          title="Nouvelle section"
-        >+</button>
-      )}
+    <div className="relative bg-nox-surface border-b border-nox-border shrink-0">
+      <div
+        className="flex items-end overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        onWheel={e => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; e.preventDefault() } }}
+      >
+        {sections.map(s => (
+          <SectionTab
+            key={s.id}
+            section={s}
+            isSelected={selectedSection?.id === s.id}
+            onSelect={onSelectSection}
+            onRename={onRenameSection}
+            onDelete={onDeleteSection}
+            onRenameStart={onRenameStart}
+            onRenameEnd={onRenameEnd}
+          />
+        ))}
+        {hasNotebook && (
+          <button
+            onClick={onCreateSection}
+            className="text-nox-muted hover:text-nox-accent transition-colors text-xl px-3 pb-1.5 shrink-0"
+            title="Nouvelle section"
+          >+</button>
+        )}
+      </div>
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-nox-surface to-transparent" />
     </div>
   )
 }
