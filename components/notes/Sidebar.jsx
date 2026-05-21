@@ -122,7 +122,8 @@ function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStar
 }
 
 export default function Sidebar({
-  notebooks, selectedNotebook, pages, selectedPage, selectedSection,
+  notebooks, selectedNotebook, pages, selectedPage,
+  canCreate,
   onSelectNotebook, onCreateNotebook,
   onSelectPage, onCreatePage, onRenamePage, onDeletePage,
   onRenameStart, onRenameEnd,
@@ -138,7 +139,7 @@ export default function Sidebar({
       />
       <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
         <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>
-        {selectedSection && !quickNotesMode && (
+        {canCreate && (
           <button
             onClick={onCreatePage}
             className="text-nox-muted hover:text-nox-accent transition-colors text-lg leading-none pb-0.5"
@@ -148,7 +149,7 @@ export default function Sidebar({
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-2">
         <div className="flex flex-col gap-0.5">
-          {!quickNotesMode && pages.map(page => (
+          {pages.map(page => (
             <PageItem
               key={page.id}
               page={page}
@@ -160,10 +161,10 @@ export default function Sidebar({
               onRenameEnd={onRenameEnd}
             />
           ))}
-          {!quickNotesMode && pages.length === 0 && selectedSection && (
-            <p className="text-xs text-nox-muted px-2 py-2">Aucune page</p>
+          {pages.length === 0 && canCreate && (
+            <p className="text-xs text-nox-muted px-2 py-2">{quickNotesMode ? 'Aucune note rapide' : 'Aucune page'}</p>
           )}
-          {!quickNotesMode && !selectedSection && (
+          {pages.length === 0 && !canCreate && (
             <p className="text-xs text-nox-muted px-2 py-2">Sélectionne une section</p>
           )}
         </div>

@@ -6,7 +6,7 @@ import TopBar from './TopBar'
 import SectionTabs from './SectionTabs'
 import Sidebar from './Sidebar'
 import NoteEditor from './NoteEditor'
-import Notes from '@/components/Notes'
+import QuickNoteEditor from './QuickNoteEditor'
 
 export default function NotesLayout() {
   const [sb, setSb] = useState(null)
@@ -19,21 +19,18 @@ export default function NotesLayout() {
   const [isRenaming, setIsRenaming] = useState(false)
   const [quickNotesMode, setQuickNotesMode] = useState(false)
   const [quickNotes, setQuickNotes] = useState([])
+  const [selectedQuickNote, setSelectedQuickNote] = useState(null)
 
   useEffect(() => { setSb(getSupabase()) }, [])
-
-  useEffect(() => {
-    if (!sb) return
-    sb.from('notes').select('*').order('created_at', { ascending: false }).then(({ data }) => {
-      setQuickNotes(data || [])
-    })
-  }, [sb])
 
   useEffect(() => {
     if (!sb) return
     sb.from('notebooks').select('*').order('position').then(({ data }) => {
       setNotebooks(data || [])
       if (data?.length) setSelectedNotebook(data[0])
+    })
+    sb.from('notes').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      setQuickNotes(data || [])
     })
   }, [sb])
 
@@ -123,6 +120,37 @@ export default function NotesLayout() {
     if (selectedPage?.id === pageId) setSelectedPage(remaining[0] ?? null)
   }
 
+  const createQuickNote = async () => {
+    const { data, error } = await sb.from('notes').insert({ title: 'Sans titre', content: '' }).select().single()
+    if (error || !data) { console.error('createQuickNote:', error?.message); return }
+    setQuickNotes(prev => [data, ...prev])
+    setSelectedQuickNote(data)
+  }
+
+  const saveQuickNote = async (id, updates) => {
+    await sb.from('notes').update(updates).eq('id', id)
+    setQuickNotes(prev => prev.map(n => n.id === id ? { ...n, ...updates } : n))
+    if (selectedQuickNote?.id === id) setSelectedQuickNote(prev => ({ ...prev, ...updates }))
+  }
+
+  const deleteQuickNote = async (id) => {
+    await sb.from('notes').delete().eq('id', id)
+    const remaining = quickNotes.filter(n => n.id !== id)
+    setQuickNotes(remaining)
+    if (selectedQuickNote?.id === id) setSelectedQuickNote(remaining[0] ?? null)
+  }
+
+  // Unified sidebar data based on mode
+  const sidebarPages = quickNotesMode ? quickNotes : pages
+  const sidebarSelectedPage = quickNotesMode ? selectedQuickNote : selectedPage
+  const sidebarOnSelectPage = quickNotesMode ? setSelectedQuickNote : setSelectedPage
+  const sidebarOnCreatePage = quickNotesMode ? createQuickNote : createPage
+  const sidebarOnRenamePage = quickNotesMode
+    ? (id, title) => saveQuickNote(id, { title })
+    : (id, title) => savePage(id, { title })
+  const sidebarOnDeletePage = quickNotesMode ? deleteQuickNote : deletePage
+  const sidebarCanCreate = quickNotesMode ? true : !!selectedSection
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-nox-bg">
       <TopBar />
@@ -130,15 +158,16 @@ export default function NotesLayout() {
         <Sidebar
           notebooks={notebooks}
           selectedNotebook={selectedNotebook}
-          pages={pages}
-          selectedPage={selectedPage}
+          pages={sidebarPages}
+          selectedPage={sidebarSelectedPage}
           selectedSection={selectedSection}
-          onSelectNotebook={setSelectedNotebook}
+          canCreate={sidebarCanCreate}
+          onSelectNotebook={(nb) => { setSelectedNotebook(nb); setQuickNotesMode(false) }}
           onCreateNotebook={createNotebook}
-          onSelectPage={setSelectedPage}
-          onCreatePage={createPage}
-          onRenamePage={(id, title) => savePage(id, { title })}
-          onDeletePage={deletePage}
+          onSelectPage={sidebarOnSelectPage}
+          onCreatePage={sidebarOnCreatePage}
+          onRenamePage={sidebarOnRenamePage}
+          onDeletePage={sidebarOnDeletePage}
           onRenameStart={() => setIsRenaming(true)}
           onRenameEnd={() => setIsRenaming(false)}
           quickNotesMode={quickNotesMode}
@@ -158,9 +187,13 @@ export default function NotesLayout() {
             />
           )}
           {quickNotesMode ? (
-            <div className="flex-1 overflow-y-auto px-10 py-8">
-              {sb && <Notes sb={sb} notes={quickNotes} setNotes={setQuickNotes} />}
-            </div>
+            selectedQuickNote
+              ? <QuickNoteEditor key={selectedQuickNote.id} note={selectedQuickNote} onSave={saveQuickNote} />
+              : (
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-nox-muted">
+                  <p className="text-sm">Sélectionne ou crée une note rapide</p>
+                </div>
+              )
           ) : selectedPage ? (
             <NoteEditor key={selectedPage.id} page={selectedPage} onSave={savePage} editorDisabled={isRenaming} />
           ) : (
