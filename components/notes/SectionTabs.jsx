@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from 'react'
 
 const COLORS = [
-  '#e74c3c', '#e67e22', '#f39c12', '#27ae60',
-  '#2980b9', '#8e44ad', '#16a085', '#e91e63',
-  '#c0392b', '#d35400', '#f1c40f', '#1e8449',
+  '#c0392b', '#a84300', '#9a7d0a', '#1e8449',
+  '#1a5276', '#6c3483', '#0e6655', '#7b241c',
+  '#922b21', '#6e2f00', '#7d6608', '#196f3d',
 ]
 
 function ColorPicker({ current, onSelect, onClose }) {
@@ -115,9 +115,9 @@ function SectionTab({ section, isSelected, onSelect, onRename, onColor, onRename
               title="Renommer"
             >✎</button>
             <button
-              onClick={e => { e.stopPropagation(); setShowColorPicker(p => !p) }}
-              className="opacity-0 group-hover:opacity-100 w-3 h-3 rounded-full shrink-0 transition-opacity border border-white/20"
-              style={{ background: color }}
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); setShowColorPicker(p => !p) }}
+              className="opacity-0 group-hover:opacity-100 w-3 h-3 rounded-full shrink-0 transition-opacity border-2 border-white/40"
+              style={{ background: section.color || '#58a6ff' }}
               title="Couleur de la section"
             />
           </>
