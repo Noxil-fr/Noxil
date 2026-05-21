@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import TopBar from './TopBar'
+import SectionTabs from './SectionTabs'
 import Sidebar from './Sidebar'
 import NoteEditor from './NoteEditor'
 
@@ -18,7 +19,6 @@ export default function NotesLayout() {
 
   useEffect(() => { setSb(getSupabase()) }, [])
 
-  // Load notebooks
   useEffect(() => {
     if (!sb) return
     sb.from('notebooks').select('*').order('position').then(({ data }) => {
@@ -27,7 +27,6 @@ export default function NotesLayout() {
     })
   }, [sb])
 
-  // Load sections when notebook changes
   useEffect(() => {
     if (!sb || !selectedNotebook) return
     setSections([])
@@ -44,7 +43,6 @@ export default function NotesLayout() {
       })
   }, [sb, selectedNotebook?.id])
 
-  // Load pages when section changes
   useEffect(() => {
     if (!sb || !selectedSection) return
     setPages([])
@@ -117,24 +115,16 @@ export default function NotesLayout() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-nox-bg">
-      <TopBar
-        notebooks={notebooks}
-        selectedNotebook={selectedNotebook}
-        sections={sections}
-        selectedSection={selectedSection}
-        onSelectNotebook={setSelectedNotebook}
-        onCreateNotebook={createNotebook}
-        onSelectSection={setSelectedSection}
-        onCreateSection={createSection}
-        onRenameSection={renameSection}
-        onRenameStart={() => setIsRenaming(true)}
-        onRenameEnd={() => setIsRenaming(false)}
-      />
+      <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
+          notebooks={notebooks}
+          selectedNotebook={selectedNotebook}
           pages={pages}
           selectedPage={selectedPage}
           selectedSection={selectedSection}
+          onSelectNotebook={setSelectedNotebook}
+          onCreateNotebook={createNotebook}
           onSelectPage={setSelectedPage}
           onCreatePage={createPage}
           onRenamePage={(id, title) => savePage(id, { title })}
@@ -143,6 +133,16 @@ export default function NotesLayout() {
           onRenameEnd={() => setIsRenaming(false)}
         />
         <div className="flex-1 overflow-hidden flex flex-col">
+          <SectionTabs
+            sections={sections}
+            selectedSection={selectedSection}
+            hasNotebook={!!selectedNotebook}
+            onSelectSection={setSelectedSection}
+            onCreateSection={createSection}
+            onRenameSection={renameSection}
+            onRenameStart={() => setIsRenaming(true)}
+            onRenameEnd={() => setIsRenaming(false)}
+          />
           {selectedPage
             ? <NoteEditor key={selectedPage.id} page={selectedPage} onSave={savePage} editorDisabled={isRenaming} />
             : (

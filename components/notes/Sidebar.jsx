@@ -1,6 +1,56 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+
+function NotebookDropdown({ notebooks, selectedNotebook, onSelect, onCreateNotebook }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative border-b border-nox-border">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-white/5 text-nox-text transition-colors"
+      >
+        <span className="text-sm font-semibold flex-1 text-left truncate">
+          {selectedNotebook?.icon || '📓'} {selectedNotebook?.name || 'Carnet'}
+        </span>
+        <span className="text-nox-muted text-[10px] shrink-0">▾</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-50 bg-nox-surface border border-nox-border rounded-xl shadow-2xl py-1 w-full min-w-48">
+          {notebooks.map(nb => (
+            <button
+              key={nb.id}
+              onClick={() => { onSelect(nb); setOpen(false) }}
+              className={`w-full text-left flex items-center gap-2 px-3 py-2 text-sm hover:bg-white/5 transition-colors ${
+                selectedNotebook?.id === nb.id ? 'text-nox-accent' : 'text-nox-text'
+              }`}
+            >
+              <span>{nb.icon || '📓'}</span>
+              <span className="truncate flex-1">{nb.name}</span>
+              {selectedNotebook?.id === nb.id && <span className="text-[10px]">✓</span>}
+            </button>
+          ))}
+          <div className="h-px bg-nox-border mx-2 my-1" />
+          <button
+            onClick={() => { onCreateNotebook(); setOpen(false) }}
+            className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-nox-muted hover:text-nox-text hover:bg-white/5 transition-colors"
+          >
+            <span>+</span>
+            <span>Nouveau carnet</span>
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStart, onRenameEnd }) {
   const [editing, setEditing] = useState(false)
@@ -72,13 +122,20 @@ function PageItem({ page, isSelected, onSelect, onDelete, onRename, onRenameStar
 }
 
 export default function Sidebar({
-  pages, selectedPage, selectedSection,
+  notebooks, selectedNotebook, pages, selectedPage, selectedSection,
+  onSelectNotebook, onCreateNotebook,
   onSelectPage, onCreatePage, onRenamePage, onDeletePage,
   onRenameStart, onRenameEnd,
 }) {
   return (
     <aside className="w-52 shrink-0 bg-nox-surface border-r border-nox-border flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/50">
+      <NotebookDropdown
+        notebooks={notebooks}
+        selectedNotebook={selectedNotebook}
+        onSelect={onSelectNotebook}
+        onCreateNotebook={onCreateNotebook}
+      />
+      <div className="flex items-center justify-between px-3 py-2 border-b border-nox-border/40">
         <span className="text-[11px] font-semibold text-nox-muted uppercase tracking-wider">Pages</span>
         {selectedSection && (
           <button
