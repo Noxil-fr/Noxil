@@ -14,7 +14,11 @@ export default function ProjectGrid({ projects, children }) {
           onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
         >
           <div>
-            <div className="text-xl font-semibold" style={{ fontFamily: "'Century Gothic', sans-serif" }}>{p.name}</div>
+            <div className="text-xl font-bold" style={{ letterSpacing: '-0.03em' }}>
+              {p.name.endsWith('.')
+                ? <>{p.name.slice(0, -1)}<span style={{ color: p.color }}>.</span></>
+                : p.name}
+            </div>
             <div className="text-[13px] text-nox-muted">{p.url.replace('https://', '')}</div>
           </div>
           <span

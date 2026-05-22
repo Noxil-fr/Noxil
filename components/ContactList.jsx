@@ -28,10 +28,21 @@ function ContactCard({ contact }) {
 }
 
 export default function ContactList({ contacts }) {
+  const [visible, setVisible] = useState(false)
   if (!contacts.length) return null
   return (
-    <div className="flex flex-row flex-wrap gap-2.5">
-      {contacts.map(c => <ContactCard key={c.id} contact={c} />)}
+    <div className="flex flex-col gap-2.5">
+      <button
+        onClick={() => setVisible(v => !v)}
+        className="self-start text-xs text-nox-muted hover:text-nox-text transition-colors border border-nox-border rounded-md px-3 py-1"
+      >
+        {visible ? 'Cacher les contacts' : 'Afficher les contacts'}
+      </button>
+      {visible && (
+        <div className="flex flex-row flex-wrap gap-2.5">
+          {contacts.map(c => <ContactCard key={c.id} contact={c} />)}
+        </div>
+      )}
     </div>
   )
 }

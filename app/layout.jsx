@@ -1,4 +1,7 @@
+import { Barlow } from 'next/font/google'
 import './globals.css'
+
+const barlow = Barlow({ subsets: ['latin'], weight: ['400', '700'] })
 
 export const metadata = { title: 'Noxil' }
 
@@ -14,7 +17,7 @@ export default function RootLayout({ children }) {
           } catch {}
         `}} />
       </head>
-      <body>{children}</body>
+      <body className={barlow.className}>{children}</body>
     </html>
   )
 }
